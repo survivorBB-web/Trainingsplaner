@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Trainingsplaner</title>
-<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Training"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.5";window.WEB_APP=true</script>
+<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Training"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.6";window.WEB_APP=true</script>
 <style>
 /* Kraftraum: warmes Fast-Schwarz, orangegraue Flächen, Orange als Akzent. Drei Bereiche nebeneinander: Woche, Tag/Übung, Fortschritt.
    Breit: alle drei sichtbar. Mittel (Handy quer, Tablet): zwei und ein Rand. Schmal: einer, links/rechts ein Rand, wischen. */
@@ -19,11 +19,12 @@
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--canvas);color:var(--ink);font:400 15px/1.5 "Barlow","Segoe UI",system-ui,sans-serif;-webkit-text-size-adjust:100%}
 /* --peek: sichtbarer Rand der Nachbarseite, --lap: so weit liegt sie unter der Hauptseite. Erste und letzte Seite reichen bis zum Bildschirmrand. */
-.deck{--peek:40px;--lap:20px;height:100vh;height:100dvh;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+/* fixed + inset:0 statt 100dvh: auf dem iPhone als Web-App war 100dvh kürzer als der Bildschirm, unten blieb ein schwarzer Streifen */
+.deck{--peek:40px;--lap:20px;position:fixed;inset:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
 .deck::-webkit-scrollbar{display:none}
 .pane{position:relative;flex:0 0 calc(100vw - 2*var(--peek));height:100%;overflow-y:auto;scroll-snap-align:center;background:var(--bg);border-inline:1px solid var(--line);box-shadow:0 0 32px var(--shadow);
   padding:max(20px,env(safe-area-inset-top,0px)) 16px max(28px,env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:16px;
-  transform-origin:center;will-change:transform;scrollbar-width:thin;scrollbar-color:var(--line) transparent;container-type:inline-size}
+  transform-origin:center;scrollbar-width:thin;scrollbar-color:var(--line) transparent;container-type:inline-size}
 /* Schmale Seite (Handy mit Rändern): Ziel und letztes Mal unter die Eingabe statt daneben */
 @container (max-width:360px){.pane .exgrid{grid-template-columns:minmax(0,1fr)}.pane .side{flex-direction:row}.pane .side .panel{min-width:0}}
 .pane+.pane{margin-left:calc(-1*var(--lap))}
@@ -365,8 +366,10 @@ function depth() {
       p.style.transform = ""; p.style.zIndex = ""; p.style.filter = swipes() && seen < .95 ? "brightness(.6)" : ""; return;
     }
     const d = Math.min(1, Math.abs(p.offsetLeft + p.offsetWidth / 2 - mid) / p.offsetWidth);
-    p.style.transform = still ? "" : "scale(1," + (1 - .05 * d).toFixed(3) + ")";   // nur flacher, damit der Rand gleich breit bleibt
-    p.style.filter = "brightness(" + (1 - .4 * d).toFixed(3) + ")";
+    // Die ganz sichtbare Seite bekommt weder Filter noch Verformung: beides machte die Schrift auf dem iPhone unscharf.
+    const r = p.getBoundingClientRect(), front = Math.min(r.right, window.innerWidth) - Math.max(r.left, 0) >= r.width - 2;
+    p.style.transform = still || front ? "" : "scale(1," + (1 - .05 * d).toFixed(3) + ")";   // nur flacher, damit der Rand gleich breit bleibt
+    p.style.filter = front ? "" : "brightness(" + (1 - .4 * d).toFixed(3) + ")";
     p.style.zIndex = String(10 - Math.round(d * 9));
   });
 }
