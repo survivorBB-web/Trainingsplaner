@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Trainingsplaner</title>
-<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Trainingsplaner"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.8.3";window.WEB_CODE=12;window.WEB_NOTES=["iPhone: Seite soll bis ganz unten reichen (Umweg um einen Fehler von iOS 26)","iPhone: Nach dem Tippen treffen Knöpfe wieder, wo man sie sieht","Fehlt beim Anlegen etwas, steht der Hinweis auch groß unten","Zahlen als Scrollrad, Splits mit den trainierten Muskeln, Tag antippen springt sofort"];window.WEB_APP=true</script>
+<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Trainingsplaner"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.8.4";window.WEB_CODE=13;window.WEB_NOTES=["Gewicht-Rad: keine doppelte Zahl mehr in der Mitte, ruhigeres Einrasten","Weicher, leicht unscharfer Übergang zum unteren Bildschirmrand"];window.WEB_APP=true</script>
 <style>
 /* Kraftraum: warmes Fast-Schwarz, orangegraue Flächen, Orange als Akzent. Drei Bereiche nebeneinander: Woche, Tag/Übung, Fortschritt.
    Breit: alle drei sichtbar. Mittel (Handy quer, Tablet): zwei und ein Rand. Schmal: einer, links/rechts ein Rand, wischen. */
@@ -22,10 +22,13 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--canvas);color:va
 /* fixed + inset:0 statt 100dvh: auf dem iPhone als Web-App war 100dvh kürzer als der Bildschirm, unten blieb ein schwarzer Streifen */
 .deck{--peek:40px;--lap:20px;position:fixed;inset:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
 .deck::-webkit-scrollbar{display:none}
+/* Weicher Übergang zum unteren Bildschirmrand: Inhalt darunter wird leicht unscharf und dunkel */
+body::after{content:"";position:fixed;left:0;right:0;bottom:0;height:calc(36px + env(safe-area-inset-bottom,0px));z-index:5;pointer-events:none;background:linear-gradient(to bottom,transparent,var(--bg));
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);-webkit-mask-image:linear-gradient(to bottom,transparent,#000 70%);mask-image:linear-gradient(to bottom,transparent,#000 70%)}
 /* iOS 26, installierte Web-App mit durchsichtiger Statusleiste: das Fenster ist um die Statusleiste zu kurz (unten abgeschnitten). 100lvh ist dort die volle Höhe. Bei undurchsichtiger Statusleiste ist der Abstand oben 0, dann bleibt es bei 100 %. */
 @media (display-mode:standalone){@supports (height:100lvh){.deck{bottom:auto;height:min(100lvh,calc(100% + env(safe-area-inset-top,0px)))}}}
 .pane{position:relative;flex:0 0 calc(100vw - 2*var(--peek));height:100%;overflow-y:auto;scroll-snap-align:center;background:var(--bg);border-inline:1px solid var(--line);box-shadow:0 0 32px var(--shadow);
-  padding:max(20px,env(safe-area-inset-top,0px)) 16px max(28px,env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:16px;
+  padding:max(20px,env(safe-area-inset-top,0px)) 16px calc(44px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:16px;
   transform-origin:center;scrollbar-width:thin;scrollbar-color:var(--line) transparent;container-type:inline-size}
 /* Schmale Seite (Handy mit Rändern): Ziel und letztes Mal unter die Eingabe statt daneben */
 @container (max-width:360px){.pane .exgrid{grid-template-columns:minmax(0,1fr)}.pane .side{flex-direction:row}.pane .side .panel{min-width:0}}
@@ -33,7 +36,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--canvas);color:va
 .pane:first-child{flex-basis:calc(100vw - var(--peek));scroll-snap-align:start;border-left:none;padding-left:max(16px,env(safe-area-inset-left,0px))}
 .pane:last-child{flex-basis:calc(100vw - var(--peek));scroll-snap-align:end;border-right:none;padding-right:max(16px,env(safe-area-inset-right,0px))}
 @media (min-width:700px){.deck{--peek:56px;--lap:0px}.pane,.pane:first-child,.pane:last-child{flex-basis:calc((100vw - var(--peek))/2)}.pane{scroll-snap-align:start}.pane:last-child{scroll-snap-align:end}}
-@media (min-width:1100px){.deck{overflow-x:hidden;scroll-snap-type:none}.pane,.pane:first-child,.pane:last-child{flex:1 1 0;min-width:0;margin-left:0;box-shadow:none;border-left:none;border-right:1px solid var(--line);padding:max(24px,env(safe-area-inset-top,0px)) 20px 32px}.pane:last-child{border-right:none}}
+@media (min-width:1100px){.deck{overflow-x:hidden;scroll-snap-type:none}.pane,.pane:first-child,.pane:last-child{flex:1 1 0;min-width:0;margin-left:0;box-shadow:none;border-left:none;border-right:1px solid var(--line);padding:max(24px,env(safe-area-inset-top,0px)) 20px 48px}.pane:last-child{border-right:none}}
 h1,h2,p{margin:0}
 .cond,.label,.btn,.tab,.chip{font-family:var(--cond);font-weight:700;text-transform:uppercase;letter-spacing:.01em}
 .num{font-family:var(--cond);font-weight:600;font-variant-numeric:tabular-nums}
@@ -99,8 +102,9 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.2;stroke
   -webkit-mask-image:linear-gradient(transparent,#000 32%,#000 68%,transparent);mask-image:linear-gradient(transparent,#000 32%,#000 68%,transparent)}
 .wheel-list::-webkit-scrollbar{display:none}
 .wheel-list>div{height:var(--row);scroll-snap-align:center;display:flex;align-items:center;justify-content:center;font-family:var(--cond);font-weight:600;font-size:22px;color:var(--muted);font-variant-numeric:tabular-nums;cursor:pointer;-webkit-user-select:none;user-select:none}
-.wheel input.input,.wheel input.bignum{position:absolute;z-index:1;left:4px;right:4px;width:auto;top:calc((var(--h) - var(--row))/2);height:var(--row);padding:0;border:none;border-radius:8px;background:var(--raise);color:var(--ink);text-align:center;font-family:var(--cond);font-weight:600;pointer-events:none;transition:opacity .1s}
+.wheel input.input,.wheel input.bignum{position:absolute;z-index:1;left:4px;right:4px;width:auto;top:calc((var(--h) - var(--row))/2);height:var(--row);padding:0;border:none;border-radius:8px;background:var(--raise);color:var(--ink);text-align:center;font-family:var(--cond);font-weight:600;pointer-events:none;transition:opacity .1s;transform:translateZ(0)}
 .wheel.moving input{opacity:0}
+.wheel:not(.moving) .wheel-list>.on{visibility:hidden}
 .wheel input:focus{pointer-events:auto;outline:2px solid var(--kraft);outline-offset:-2px}
 .wheel.big{--row:52px;--h:120px;background:transparent;box-shadow:none}
 .wheel.big .wheel-list>div{font-size:30px}
@@ -411,21 +415,25 @@ function setupWheel(w) {
   if (vals.indexOf(v) < 0) { vals.push(v); vals.sort((a, b) => a - b); }   // getippte Zahl außerhalb des Rasters kommt dazu
   if (inp.value === "") inp.value = num(v);
   list.innerHTML = vals.map(x => '<div>' + num(x) + '</div>').join("");
-  w._vals = vals; w._skip = true;
-  list.scrollTop = vals.indexOf(v) * list.firstChild.offsetHeight;
+  w._vals = vals;
+  list.scrollTop = w._target = vals.indexOf(v) * list.firstChild.offsetHeight;
+  markWheel(w, vals.indexOf(v));
 }
+// Die Zahl in der Mitte der Liste wird ausgeblendet, solange das Feld darüber sie zeigt. Sonst scheint sie auf dem iPhone durch (das Scrollfeld malt dort über dem Eingabefeld).
+function markWheel(w, i) { if (w._on) w._on.classList.remove("on"); w._on = w.firstChild.children[i] || null; if (w._on) w._on.classList.add("on"); }
 function wheelAt(list) { return Math.round(list.scrollTop / list.firstChild.offsetHeight); }
 document.addEventListener("scroll", e => {
   const list = e.target;
   if (!list.classList || !list.classList.contains("wheel-list")) return;
   const w = list.parentNode;
-  if (w._skip) { w._skip = false; return; }   // Sprung beim Einstellen, nicht vom Wischen
+  if (Math.abs(list.scrollTop - w._target) < 1 && !w.classList.contains("moving")) return;   // eigener Sprung beim Einstellen, nicht vom Wischen
   w.classList.add("moving"); clearTimeout(w._t);
   w._t = setTimeout(() => {
     w.classList.remove("moving");
+    markWheel(w, wheelAt(list));
     const inp = w.querySelector("input"), v = w._vals[wheelAt(list)];
     if (v != null && toNum(inp.value) !== v) { inp.value = num(v); inp.dispatchEvent(new Event("input", { bubbles: true })); }
-  }, 110);
+  }, 150);   // etwas warten: beim Ausrollen kommen auf dem iPhone die Scroll-Meldungen in Abständen
 }, true);
 document.addEventListener("click", e => {
   const item = e.target.closest && e.target.closest(".wheel-list>div");
@@ -443,7 +451,7 @@ document.addEventListener("keydown", e => {
   if (!w || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
   e.preventDefault();
   const list = w.firstChild, h = list.firstChild.offsetHeight, i = Math.max(0, Math.min(w._vals.length - 1, wheelAt(list) + (e.key === "ArrowUp" ? 1 : -1)));
-  w._skip = true; list.scrollTop = i * h; e.target.value = num(w._vals[i]); e.target.dispatchEvent(new Event("input", { bubbles: true }));
+  list.scrollTop = w._target = i * h; markWheel(w, i); e.target.value = num(w._vals[i]); e.target.dispatchEvent(new Event("input", { bubbles: true }));
 });
 
 function head(title, sub) {
