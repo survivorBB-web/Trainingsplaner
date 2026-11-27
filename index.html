@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Trainingsplaner</title>
-<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Trainingsplaner"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.8.6";window.WEB_CODE=15;window.WEB_NOTES=["Handy: Wochentag antippen wählt nur den Tag aus, die Woche bleibt stehen. Zum Tag wischen, wenn du ihn sehen willst."];window.WEB_APP=true</script>
+<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Trainingsplaner"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.8.7";window.WEB_CODE=16;window.WEB_NOTES=["Tag öffnen und Weiter mit …: die Seite gleitet weich zur nächsten, statt zu springen"];window.WEB_APP=true</script>
 <style>
 /* Kraftraum: warmes Fast-Schwarz, orangegraue Flächen, Orange als Akzent. Drei Bereiche nebeneinander: Woche, Tag/Übung, Fortschritt.
    Breit: alle drei sichtbar. Mittel (Handy quer, Tablet): zwei und ein Rand. Schmal: einer, links/rechts ein Rand, wischen. */
@@ -385,8 +385,21 @@ function show(i) {
   if (!swipes()) return;
   const p = document.getElementById(PANES[i]), max = deck.scrollWidth - deck.clientWidth;
   const left = i === 0 ? 0 : i === 2 ? max : Math.min(max, window.innerWidth >= 700 ? p.offsetLeft : p.offsetLeft - (deck.clientWidth - p.offsetWidth) / 2);
-  deck.scrollTo({ left: left, behavior: "auto" });
+  glide(left);
 }
+/* Gleiten statt Springen: eigene Bewegung, weil weiches Scrollen mit Einrasten auf dem Handy ruckelt oder abbricht. Einrasten ist währenddessen aus. */
+let glideRaf = 0, glideEnd = 0;
+function glide(to) {
+  cancelAnimationFrame(glideRaf); clearTimeout(glideEnd);
+  const from = deck.scrollLeft, d = to - from, dur = 420, t0 = performance.now();
+  const done = () => { cancelAnimationFrame(glideRaf); clearTimeout(glideEnd); deck.scrollLeft = to; deck.style.scrollSnapType = ""; };
+  if (Math.abs(d) < 1 || matchMedia("(prefers-reduced-motion: reduce)").matches) { done(); return; }
+  deck.style.scrollSnapType = "none";
+  const step = now => { const p = Math.min(1, (now - t0) / dur); deck.scrollLeft = from + d * (1 - Math.pow(1 - p, 3)); if (p < 1) glideRaf = requestAnimationFrame(step); else done(); };
+  glideRaf = requestAnimationFrame(step);
+  glideEnd = setTimeout(done, dur + 150);   // falls das Fenster keine Bilder zeichnet
+}
+deck.addEventListener("touchstart", () => { if (deck.style.scrollSnapType) { cancelAnimationFrame(glideRaf); clearTimeout(glideEnd); deck.style.scrollSnapType = ""; } }, { passive: true });
 let raf = 0;
 function depth() {
   raf = 0;
