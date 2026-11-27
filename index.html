@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Trainingsplaner</title>
-<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Trainingsplaner"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.8.5";window.WEB_CODE=14;window.WEB_NOTES=["Unschärfe am unteren Rand nimmt nach unten zu und läuft nach oben glatt ins Scharfe aus, insgesamt etwas schwächer"];window.WEB_APP=true</script>
+<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Trainingsplaner"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.8.6";window.WEB_CODE=15;window.WEB_NOTES=["Handy: Wochentag antippen wählt nur den Tag aus, die Woche bleibt stehen. Zum Tag wischen, wenn du ihn sehen willst."];window.WEB_APP=true</script>
 <style>
 /* Kraftraum: warmes Fast-Schwarz, orangegraue Flächen, Orange als Akzent. Drei Bereiche nebeneinander: Woche, Tag/Übung, Fortschritt.
    Breit: alle drei sichtbar. Mittel (Handy quer, Tablet): zwei und ein Rand. Schmal: einer, links/rechts ein Rand, wischen. */
@@ -354,7 +354,7 @@ function startMid() {
 let ui = startMid();
 const PANES = ["p-week", "p-mid", "p-prog"];
 function go(next) { stack.push(ui); ui = next; render(); $("#p-mid").scrollTop = 0; show(1); }
-function openMid(next, base) { stack.length = 0; if (base) stack.push(base); ui = next; render(); $("#p-mid").scrollTop = 0; show(1); }
+function openMid(next, base, stay) { stack.length = 0; if (base) stack.push(base); ui = next; render(); $("#p-mid").scrollTop = 0; if (!stay) show(1); }
 function back() { ui = stack.pop() || { view: "day", ds: today() }; render(); }
 window.appBack = () => {
   if ($(".sheet-wrap")) { closeSheet(); return true; }
@@ -836,7 +836,7 @@ function addToDay(ds, id, scope) {
 
 const ACT = {
   back: () => back(),
-  day: d => openMid({ view: "day", ds: d.ds }),
+  day: (d, el) => openMid({ view: "day", ds: d.ds }, null, el.classList.contains("tile")),   // Tageskachel: nur auswählen, die Woche bleibt stehen (Bens Wunsch); die Mitte zeigt den Tag beim Hinwischen
   ex: (d, el) => { const next = { view: "ex", ds: d.ds || ui.ds, id: d.id }; if (el.closest("#p-week")) openMid(next, { view: "day", ds: next.ds }); else go(next); },
   week: d => { weekOff += Number(d.d); render(); },
   thisweek: () => { weekOff = 0; render(); },
