@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Trainingsplaner</title>
-<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Trainingsplaner"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.8.1";window.WEB_CODE=10;window.WEB_NOTES=["Zahlen als Scrollrad: wischen zum Einstellen, die Mitte antippen zum Tippen","Splits bei der Übung: Push, Pull, Oberkörper, Unterkörper, Ganzkörper","Bei Muskelgruppe und Split steht, welche Muskeln trainiert werden","Tag antippen springt sofort zum Tag","iPhone: App heißt Trainingsplaner, neue Statusleiste gegen den abgeschnittenen Rand unten","Zwischen den Seiten wischen klappt auch, wenn man auf einem Scrollrad anfängt","Das Zahnrad-Menü bleibt offen, während eine Übung offen ist"];window.WEB_APP=true</script>
+<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Trainingsplaner"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.8.2";window.WEB_CODE=11;window.WEB_NOTES=["iPhone: Nach dem Tippen treffen Knöpfe wieder, wo man sie sieht (z. B. Übung anlegen)","Fehlt beim Anlegen etwas, steht der Hinweis jetzt auch groß unten","Zahlen als Scrollrad: wischen zum Einstellen, die Mitte antippen zum Tippen","Splits bei der Übung: Push, Pull, Oberkörper, Unterkörper, Ganzkörper, mit den trainierten Muskeln","Tag antippen springt sofort zum Tag","iPhone: App heißt Trainingsplaner, neue Statusleiste gegen den abgeschnittenen Rand unten"];window.WEB_APP=true</script>
 <style>
 /* Kraftraum: warmes Fast-Schwarz, orangegraue Flächen, Orange als Akzent. Drei Bereiche nebeneinander: Woche, Tag/Übung, Fortschritt.
    Breit: alle drei sichtbar. Mittel (Handy quer, Tablet): zwei und ein Rand. Schmal: einer, links/rechts ein Rand, wischen. */
@@ -432,7 +432,10 @@ document.addEventListener("click", e => {
   if (i === wheelAt(list)) { const inp = list.parentNode.querySelector("input"); inp.focus(); inp.select(); }
   else list.scrollTo({ top: i * item.offsetHeight, behavior: "smooth" });
 });
-document.addEventListener("focusout", e => { const w = e.target.closest && e.target.closest(".wheel"); if (w) setupWheel(w); });
+document.addEventListener("focusout", e => { const w = e.target.closest && e.target.closest(".wheel"); if (w) setupWheel(w); setTimeout(unshift, 60); });
+// iPhone: Nach dem Schließen der Tastatur bleibt das Fenster manchmal verschoben, dann treffen Fingertipps nicht mehr den Knopf, den man sieht. Die Seite selbst scrollt nie, also zurück auf 0.
+function unshift() { const a = document.activeElement; if ((window.scrollY || window.scrollX) && !(a && /^(INPUT|TEXTAREA)$/.test(a.tagName))) window.scrollTo(0, 0); }
+if (window.visualViewport) visualViewport.addEventListener("resize", unshift);
 document.addEventListener("keydown", e => {
   const w = e.target.closest && e.target.closest(".wheel");
   if (!w || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
@@ -835,7 +838,7 @@ const ACT = {
   addexisting: d => { const undo = snapshot(); addToDay(ui.ds, d.id, ui.f.scope); save(); back(); toast(st.ex[d.id].name + " hinzugefügt", undo); },
   saveform: () => {
     const f = ui.f, name = f.name.trim();
-    const fail = m => { ui.msg = m; render(); };
+    const fail = m => { ui.msg = m; render(); toast(m); };   // Meldung auch unten einblenden, die Zeile über dem Knopf übersieht man leicht
     if (!name) return fail("Bitte gib der Übung einen Namen.");
     const edit = ui.id, ex = edit ? st.ex[edit] : { kind: f.kind };
     let fields;
