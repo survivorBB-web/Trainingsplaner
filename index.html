@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Trainingsplaner</title>
-<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Training"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.6";window.WEB_APP=true</script>
+<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Training"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.7";window.WEB_CODE=8;window.WEB_NOTES=["iPhone-Web-App: „Nach Updates suchen“ im Zahnrad, rote 1 bei neuer Version und „Update erfolgreich!“"];window.WEB_APP=true</script>
 <style>
 /* Kraftraum: warmes Fast-Schwarz, orangegraue Flächen, Orange als Akzent. Drei Bereiche nebeneinander: Woche, Tag/Übung, Fortschritt.
    Breit: alle drei sichtbar. Mittel (Handy quer, Tablet): zwei und ein Rand. Schmal: einer, links/rechts ein Rand, wischen. */
@@ -632,22 +632,30 @@ applyTheme();
 /* Updates (nur Android-App): beim Start im Hintergrund nachsehen; gibt es eins, steht eine rote 1 am Zahnrad und am Knopf.
    Heruntergeladen wird im Browser, die App installiert nichts selbst (sonst blockiert Play Protect sie, Erfahrung vom Tagesplaner). */
 const app = window.AndroidApp;
+// Web-App (iPhone): build-web.ps1 setzt WEB_CODE und WEB_NOTES; sie liest version.json selbst und lädt sich neu.
+const webUpd = !app && !!window.WEB_APP && !!window.WEB_CODE;
+const curName = () => app ? app.versionName() : (window.WEB_VERSION || "");
+const curCode = () => app ? app.versionCode() : (+window.WEB_CODE || 0);
 let upd = null, updAsked = false, updTimer = null;
 function updSheet(title, text, notes, canGet) {
   sheet('<h2 class="cond h2">' + esc(title) + '</h2><p>' + esc(text) + '</p>' +
     (notes && notes.length ? '<ul style="margin:0;padding-left:20px">' + notes.map(n => '<li>' + esc(n) + '</li>').join("") + '</ul>' : '') +
-    (canGet ? '<button class="btn" data-act="updget">Herunterladen</button>' : '') + '<button class="btn ghost" data-act="close">' + (canGet ? 'Später' : 'OK') + '</button>');
+    (canGet ? '<button class="btn" data-act="updget">' + (app ? 'Herunterladen' : 'Jetzt aktualisieren') + '</button>' : '') + '<button class="btn ghost" data-act="close">' + (canGet ? 'Später' : 'OK') + '</button>');
 }
 function showUpdate(offline) {
   if (offline) updSheet("Keine Verbindung", "Ob es ein Update gibt, lässt sich gerade nicht prüfen. Hast du Internet?");
-  else if (upd) updSheet("Update verfügbar", "Version " + upd.name + " ist da, du hast " + app.versionName() + ".", upd.notes, true);
-  else updSheet("Alles aktuell", "Die App ist auf dem neuesten Stand (Version " + app.versionName() + ").");
+  else if (upd) updSheet("Update verfügbar", "Version " + upd.name + " ist da, du hast " + curName() + ".", upd.notes, true);
+  else updSheet("Alles aktuell", "Die App ist auf dem neuesten Stand (Version " + curName() + ").");
 }
-if (app) window.appUpdateInfo = body => {
+function checkUpdate() {
+  if (app) return app.checkUpdate();
+  fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then(r => r.ok ? r.text() : null).catch(() => null).then(t => window.appUpdateInfo(t));
+}
+if (app || webUpd) window.appUpdateInfo = body => {
   let v = null;
   try { v = JSON.parse(body); } catch (e) { }
   clearTimeout(updTimer);
-  upd = v && +v.code > app.versionCode() ? v : null;
+  upd = v && +v.code > curCode() ? v : null;
   render(); refreshPop();
   if (updAsked) { updAsked = false; showUpdate(!v); }
   // pro neuer Version einmal von selbst, aber nicht über ein offenes Fenster (z. B. „Update erfolgreich!“), dann beim nächsten Start
@@ -665,9 +673,9 @@ function popHtml() {
     if (rm.on) h += '<p class="muted small">Nur an Tagen mit Training. Feld leer lassen: an diesem Wochentag keine Erinnerung.</p><div class="times">' +
       WD.map((d, i) => '<label for="rm-' + i + '" class="small">' + d + '</label><input type="time" id="rm-' + i + '" data-rm="' + i + '" value="' + esc(rm.times[i] || "") + '">').join("") + '</div>';
   } else h += '<p class="muted small">Gibt es nur in der Android-App.</p>' + (ios ? '' : '<a class="soft" href="' + APK_URL + '">Android-App laden</a>');
-  if (app || canInstall()) {
+  if (app || webUpd || canInstall()) {
     h += '<span class="label">App</span>';
-    if (app) h += '<button class="soft" data-act="updcheck">' + (updAsked ? 'Sucht …' : 'Nach Updates suchen') + (upd ? '<b class="badge">1</b>' : '') + '</button>';
+    if (app || webUpd) h += '<button class="soft" data-act="updcheck">' + (updAsked ? 'Sucht …' : 'Nach Updates suchen') + (upd ? '<b class="badge">1</b>' : '') + '</button>';
     if (canInstall()) h += '<button class="soft" data-act="install">App installieren</button>';
   }
   h += '<span class="label">Plan</span><button class="soft" data-act="plan">Rhythmus und Sicherung</button>';
@@ -788,9 +796,17 @@ const ACT = {
     closePop(); updAsked = true;
     clearTimeout(updTimer);
     updTimer = setTimeout(() => { if (!updAsked) return; updAsked = false; showUpdate(true); }, 6000);   // spätestens nach 6 Sekunden eine Antwort
-    app.checkUpdate();
+    checkUpdate();
   },
-  updget: () => { if (!upd) return; app.openDownload(upd.name); closeSheet(); toast("Download im Browser: Trainingsplaner-" + upd.name + ".apk öffnen und installieren"); },
+  updget: () => {
+    if (!upd) return;
+    if (app) { app.openDownload(upd.name); closeSheet(); toast("Download im Browser: Trainingsplaner-" + upd.name + ".apk öffnen und installieren"); return; }
+    // Web-App: Offline-Speicher erneuern lassen, dann neu laden (die Seite selbst kommt mit Internet immer frisch)
+    closeSheet(); toast("Wird aktualisiert …");
+    const reload = () => location.reload();
+    (navigator.serviceWorker && navigator.serviceWorker.getRegistration ? navigator.serviceWorker.getRegistration() : Promise.resolve(null))
+      .then(r => r && r.update()).catch(() => { }).then(reload, reload);
+  },
   plan: () => { closePop(); go({ view: "settings" }); },
   tour: () => { closePop(); tour(0); },
   tournext: () => tour(tourAt + 1),
@@ -898,6 +914,14 @@ if (app) {
   }
   kv.set("trainingsplaner.appVersion", cur);
   app.checkUpdate();
+}
+if (webUpd) {
+  // Web-App: nach einer neuen Version einmal „Update erfolgreich!“, danach im Hintergrund nach Updates sehen
+  const cur = curCode(), last = kv.get("trainingsplaner.webVersion", 0);
+  // auch beim ersten Start mit dieser Funktion, wenn schon Daten da sind (Update von 1.6 oder älter)
+  if (last ? last < cur : !firstRun) updSheet("Update erfolgreich!", "Du hast jetzt Version " + curName() + ".", window.WEB_NOTES || []);
+  kv.set("trainingsplaner.webVersion", cur);
+  checkUpdate();
 }
 if (firstRun && !kv.get("trainingsplaner.tutorial", 0)) setTimeout(() => tour(0), 400);
 if (!native) { try { navigator.storage && navigator.storage.persist && navigator.storage.persist().catch(() => { }); } catch (e) { } }
