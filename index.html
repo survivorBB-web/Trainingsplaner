@@ -4,17 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Trainingsplaner</title>
-<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Training"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.2";window.WEB_APP=true</script>
+<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Training"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.3";window.WEB_APP=true</script>
 <style>
 /* Kraftraum: warmes Fast-Schwarz, orangegraue Flächen, Orange als Akzent. Drei Bereiche nebeneinander: Woche, Tag/Übung, Fortschritt.
    Breit: alle drei sichtbar. Mittel (Handy quer, Tablet): zwei und ein Rand. Schmal: einer, links/rechts ein Rand, wischen. */
-:root{--canvas:#0B0908;--bg:#15110E;--surface:#221C17;--raise:#2E2620;--line:#3A3029;--ink:#F4EFE8;--muted:#B0A497;--accent-ink:#FFA566;--kraft:#FF8A3D;--kardio:#5B9BFF;--ok:#7DD3A8;--on-accent:#1a0f06;--cond:"Barlow Condensed","Arial Narrow",sans-serif;color-scheme:dark}
+:root{--canvas:#0B0908;--bg:#15110E;--surface:#221C17;--raise:#2E2620;--line:#3A3029;--ink:#F4EFE8;--muted:#B0A497;--accent-ink:#FFA566;--kraft:#FF8A3D;--kardio:#5B9BFF;--ok:#7DD3A8;--on-accent:#1a0f06;
+  --t-kraft:#FF8A3D;--t-kardio:#5B9BFF;--t-rest:#5B4E45;--t-missed:#6E4441;--t-ink:#14100c;--t-rest-ink:#F1E4E2;--t-missed-ink:#F1E4E2;
+  --sel-bg:#3A2A1F;--danger:#6E4441;--danger-ink:#F1E4E2;--toast-act:#9A4308;--shadow:rgba(0,0,0,.6);--cond:"Barlow Condensed","Arial Narrow",sans-serif;color-scheme:dark}
+/* Hell: dieselbe Welt bei Tageslicht, warmes Hellgrau und Orange */
+:root[data-theme="light"]{--canvas:#D8CFC5;--bg:#F6F1EB;--surface:#ECE4DB;--raise:#E2D8CD;--line:#D3C7BA;--ink:#221B16;--muted:#6B5F55;--accent-ink:#A84B0C;--kraft:#F07A2C;--kardio:#3B7DDB;--ok:#2E7D57;
+  --t-kraft:#F28A44;--t-kardio:#6FA3EE;--t-rest:#CDBFB1;--t-missed:#A86A64;--t-ink:#1d1510;--t-rest-ink:#2A211B;--t-missed-ink:#FFF5F3;
+  --sel-bg:#F7D9C2;--danger:#A84A44;--danger-ink:#FFF5F3;--toast-act:#FFA566;--shadow:rgba(60,40,20,.22);color-scheme:light}
+:root[data-theme="light"] .graph polyline{filter:brightness(.72) saturate(1.5)}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--canvas);color:var(--ink);font:400 15px/1.5 "Barlow","Segoe UI",system-ui,sans-serif;-webkit-text-size-adjust:100%}
 /* --peek: sichtbarer Rand der Nachbarseite, --lap: so weit liegt sie unter der Hauptseite. Erste und letzte Seite reichen bis zum Bildschirmrand. */
 .deck{--peek:40px;--lap:20px;height:100vh;height:100dvh;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
 .deck::-webkit-scrollbar{display:none}
-.pane{position:relative;flex:0 0 calc(100vw - 2*var(--peek));height:100%;overflow-y:auto;scroll-snap-align:center;background:var(--bg);border-inline:1px solid var(--line);box-shadow:0 0 32px rgba(0,0,0,.6);
+.pane{position:relative;flex:0 0 calc(100vw - 2*var(--peek));height:100%;overflow-y:auto;scroll-snap-align:center;background:var(--bg);border-inline:1px solid var(--line);box-shadow:0 0 32px var(--shadow);
   padding:max(20px,env(safe-area-inset-top,0px)) 16px max(28px,env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:16px;
   transform-origin:center;will-change:transform;scrollbar-width:thin;scrollbar-color:var(--line) transparent;container-type:inline-size}
 /* Schmale Seite (Handy mit Rändern): Ziel und letztes Mal unter die Eingabe statt daneben */
@@ -61,7 +68,7 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.2;stroke
 .btn{min-height:56px;border:none;border-radius:10px;background:var(--kraft);color:var(--on-accent);font-size:21px;padding:0 16px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;text-align:center}
 .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);font-size:18px;min-height:52px}
 .btn.big{min-height:64px;font-size:24px;border-radius:12px}
-.btn.danger{background:#6E4441;color:#F1E4E2}
+.btn.danger{background:var(--danger);color:var(--danger-ink)}
 .list{display:flex;flex-direction:column;gap:8px}
 .item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;background:var(--surface);border:none;text-align:left;width:100%;min-height:60px}
 .sw{width:12px;height:12px;border-radius:3px;flex-shrink:0}
@@ -116,17 +123,36 @@ textarea.input{height:120px;padding:10px;font:12px/1.4 ui-monospace,Consolas,mon
 .choice{position:relative;display:block}
 .choice input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
 .choice>span{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:8px;background:var(--raise);font-weight:600;border:2px solid transparent}
-.choice input:checked+span{border-color:var(--kraft);background:#3A2A1F}
+.choice input:checked+span{border-color:var(--kraft);background:var(--sel-bg)}
 .choice input:focus-visible+span{outline:2px solid var(--kraft);outline-offset:2px}
 .trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.msg{color:#FFB07A;font-size:14px;min-height:21px}
+.msg{color:var(--accent-ink);font-size:14px;min-height:21px}
 .sheet-wrap{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;z-index:10}
 .sheet{background:var(--surface);width:100%;max-width:480px;border-radius:16px 16px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:6px 6px 6px 16px;border-radius:10px;display:flex;align-items:center;gap:12px;z-index:20;width:max-content;max-width:calc(100% - 32px);font-weight:500}
-.toast button{border:none;background:transparent;color:#9A4308;font-weight:700;min-height:40px;padding:0 10px}
+.toast button{border:none;background:transparent;color:var(--toast-act);font-weight:700;min-height:40px;padding:0 10px}
 .empty{color:var(--muted)}
 .sep{height:1px;background:var(--line);margin:4px 0}
+/* Zahnrad-Menü wie beim Tagesplaner */
+.icon{position:relative}
+.badge{background:#E5484D;color:#fff;border-radius:999px;min-width:18px;height:18px;font:700 11px/18px system-ui,sans-serif;text-align:center;padding:0 5px}
+.icon .badge{position:absolute;top:-5px;right:-5px}
+.pop{position:fixed;z-index:15;width:min(330px,calc(100vw - 24px));max-height:calc(100dvh - 90px);overflow-y:auto;background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 18px 40px -12px var(--shadow);padding:14px;display:flex;flex-direction:column;gap:8px}
+.pop .label{margin-top:6px}
+.segctl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;background:var(--raise);padding:4px;border-radius:10px}
+.segctl button{border:none;background:transparent;min-height:40px;border-radius:8px;font-weight:600}
+.segctl button[aria-pressed="true"]{background:var(--kraft);color:var(--on-accent)}
+.soft{min-height:44px;border:1px solid var(--line);background:var(--bg);border-radius:10px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;color:var(--ink)}
+.check{display:flex;align-items:center;gap:10px;min-height:44px;font-weight:600}
+.check input{width:22px;height:22px;accent-color:var(--kraft)}
+.times{display:grid;grid-template-columns:repeat(2,auto minmax(0,1fr));gap:6px 10px;align-items:center}
+.times input{height:40px;background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:0 8px;font:inherit;min-width:0}
+.tagx{font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:.05em;padding:2px 6px;border-radius:4px;border:1px solid var(--accent-ink);color:var(--accent-ink);margin-left:6px;vertical-align:2px}
+.tour{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(440px,calc(100vw - 32px));background:var(--surface);border:2px solid var(--kraft);
+  border-radius:16px;padding:16px;z-index:18;box-shadow:0 18px 40px -12px var(--shadow);display:flex;flex-direction:column;gap:10px}
+.pane.focus{outline:3px solid var(--kraft);outline-offset:-3px}
 </style>
 </head>
 <body>
@@ -205,7 +231,7 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 const today = () => iso(new Date());
-const COLORS = { kraft: "#FF8A3D", kardio: "#5B9BFF", rest: "#5B4E45", missed: "#6E4441" };
+const COLORS = { kraft: "var(--t-kraft)", kardio: "var(--t-kardio)", rest: "var(--t-rest)", missed: "var(--t-missed)" };
 const KIND = { kraft: "Kraft", kardio: "Kardio", mix: "Kraft + Kardio", rest: "Ruhetag", missed: "Verpasst" };
 const WD = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 const WDL = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
@@ -218,12 +244,12 @@ const toNum = v => { const n = parseFloat(String(v == null ? "" : v).replace(","
 const fmt = ds => { const d = parse(ds); return pad(d.getDate()) + "." + pad(d.getMonth() + 1) + "."; };
 const AB = st2 => st2.rhythm === 2;
 const tileBg = k => k === "mix" ? "linear-gradient(135deg," + COLORS.kraft + " 50%," + COLORS.kardio + " 50%)" : COLORS[k];
-const tileInk = k => (k === "rest" || k === "missed") ? "#F1E4E2" : "#14100c";
+const tileInk = k => k === "rest" ? "var(--t-rest-ink)" : k === "missed" ? "var(--t-missed-ink)" : "var(--t-ink)";
 const I = {
   back: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6l-6 6 6 6"/></svg>',
   next: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6l6 6-6 6"/></svg>',
   chart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16M6 15l4-4 3 3 5-6"/></svg>',
-  gear: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>',
+  gear: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.65" style="stroke-width:3.1;stroke-dasharray:.5 5.42;stroke-linecap:round"/><path style="fill:currentColor;stroke:none" fill-rule="evenodd" d="M8 3.1a4.9 4.9 0 1 0 0 9.8a4.9 4.9 0 1 0 0-9.8ZM8 6.4a1.6 1.6 0 1 1 0 3.2a1.6 1.6 0 1 1 0-3.2Z"/></svg>',
   check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
   plus: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
   minus: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg>',
@@ -234,13 +260,48 @@ const I = {
 const KEY = "trainingsplaner.zustand";
 const native = window.AndroidStore;
 const valid = s => s && s.v === 1 && s.plan && s.ex && s.log && s.days ? s : null;
-function readLocal() { try { const v = native ? native.get(KEY) : localStorage.getItem(KEY); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
-let st = valid(readLocal()) || newState(today());
+const kv = {
+  get(k, d) { try { const v = native ? native.get(k) : localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { const s = JSON.stringify(v); if (native) return native.set(k, s) !== false; localStorage.setItem(k, s); return true; } catch (e) { return false; } }
+};
+// Beim ersten Öffnen: zwei Beispielübungen für heute, mit drei alten Einträgen, damit man den Fortschritt sieht.
+function withSamples(s0) {
+  const t = today(), wd = weekday(t);
+  s0.ex.bsp1 = { name: "Kniebeugen", kind: "kraft", group: "beine", kg: 40, reps: 10, sets: 3, sample: true };
+  s0.ex.bsp2 = { name: "Laufband", kind: "kardio", track: "dauer", min: 20, kcal: 0, sample: true };
+  s0.plan[0][wd] = ["bsp1", "bsp2"];
+  [3, 2, 1].forEach((w, i) => {
+    const kg = 30 + i * 5;
+    s0.log[addDays(t, -7 * w)] = { bsp1: { sets: [{ kg: kg, reps: 10 }, { kg: kg, reps: 10 }, { kg: kg, reps: 8 }] }, bsp2: { min: 15 + i * 3, kcal: 0 } };
+  });
+  return s0;
+}
+const firstRun = !valid(kv.get(KEY, null));
+let st = valid(kv.get(KEY, null)) || withSamples(newState(today()));
 let db = null, dbTimer = null;
 function save() {
   const s = JSON.stringify(st);
   try { if (native) native.set(KEY, s); else localStorage.setItem(KEY, s); } catch (e) { }
   if (db) { clearTimeout(dbTimer); dbTimer = setTimeout(() => db.doc("zustand/haupt").set({ json: s }).catch(() => { }), 500); }
+  writeReminders();
+}
+
+/* Erinnerungen (nur Android-App): die Seite rechnet die nächsten 14 Tage aus, die App stellt daraus den Wecker. */
+const RM_KEY = "trainingsplaner.erinnerung";
+let rm = kv.get(RM_KEY, null) || { on: false, times: ["17:00", "17:00", "17:00", "17:00", "17:00", "10:00", "10:00"], events: [] };
+function writeReminders() {
+  if (!native) return;
+  const t = today(), now = Date.now(), events = [];
+  if (rm.on) for (let d = 0; d < 14; d++) {
+    const ds = addDays(t, d), list = dayList(st, ds), hm = rm.times[weekday(ds)];
+    if (!list.length || !/^\d\d:\d\d$/.test(hm || "")) continue;
+    const log = st.log[ds] || {};
+    if (d === 0 && list.every(id => entryDone(st.ex[id], log[id]))) continue;
+    const p = parse(ds); p.setHours(+hm.slice(0, 2), +hm.slice(3, 5), 0, 0);
+    if (p.getTime() > now) events.push({ at: p.getTime(), title: "Training heute", text: summary(list), id: 100 + d });
+  }
+  rm.events = events;
+  kv.set(RM_KEY, rm);
 }
 
 /* Drei Bereiche: links die Woche, in der Mitte Tag, Übung, Formular oder Einstellungen (mit eigenem Zurück), rechts der Fortschritt. */
@@ -262,6 +323,8 @@ function openMid(next, base) { stack.length = 0; if (base) stack.push(base); ui 
 function back() { ui = stack.pop() || { view: "day", ds: today() }; render(); }
 window.appBack = () => {
   if ($(".sheet-wrap")) { closeSheet(); return true; }
+  if ($(".pop")) { closePop(); return true; }
+  if (tourAt >= 0) { tour(-1); return true; }
   if (stack.length) { back(); return true; }
   if (swipes() && current() !== 0) { show(0); return true; }
   return false;
@@ -340,13 +403,13 @@ VIEWS.week = () => {
   }
   let html = '<header class="top"><div><h1 class="cond big">Woche <span class="acc">' + isoWeek(mon) + '</span></h1></div><div class="row">' +
     '<button class="icon" data-act="progress" aria-label="Fortschritt">' + I.chart + '</button>' +
-    '<button class="icon" data-act="settings" aria-label="Einstellungen">' + I.gear + '</button></div></header>' +
+    '<button class="icon" id="set-btn" data-act="pop" aria-label="Einstellungen" aria-haspopup="dialog" aria-expanded="' + !!$(".pop") + '">' + I.gear + (upd ? '<b class="badge" aria-label="Update verfügbar">1</b>' : '') + '</button></div></header>' +
     '<div class="weekbar"><button class="icon" data-act="week" data-d="-1" aria-label="Vorige Woche">' + I.back + '</button><p class="muted">' + range + '</p>' +
     '<button class="icon" data-act="week" data-d="1" aria-label="Nächste Woche">' + I.next + '</button></div>' +
     '<div class="tiles" role="group" aria-label="Tage der Woche">' + tiles + '</div>';
   if (weekOff !== 0) html += '<button class="btn ghost" data-act="thisweek">Zur aktuellen Woche</button>';
   else html += todayCard(t) + upcoming(t);
-  if (canInstall()) html += '<button class="btn ghost" data-act="install">App installieren</button>';
+  if (Object.keys(st.ex).some(id => st.ex[id].sample)) html += '<button class="btn ghost" data-act="nosamples">Beispiele entfernen</button>';
   html += '<div class="legend">' + [["Kraft", COLORS.kraft], ["Kardio", COLORS.kardio], ["Ruhetag", COLORS.rest], ["Verpasst", COLORS.missed]].map(l => '<span><span class="sw" style="background:' + l[1] + '"></span>' + l[0] + '</span>').join("") + '</div>';
   return html;
 };
@@ -374,7 +437,7 @@ function upcoming(t) {
     const ds = addDays(t, i), list = dayList(st, ds);
     if (!list.length) continue;
     const k = dayKind(st, ds, t), pl = planLabel(ds);
-    rows.push('<button class="item" data-act="day" data-ds="' + ds + '"><span class="bar" style="background:' + (k === "mix" ? "linear-gradient(180deg," + COLORS.kraft + " 50%," + COLORS.kardio + " 50%)" : COLORS[k]) + '"></span><span class="col"><span class="name">' + esc(summary(list)) + '</span><span class="muted small">' + WDL[weekday(ds)] + ' · ' + KIND[k] + (pl ? ' · ' + pl : '') + '</span></span></button>');
+    rows.push('<button class="item" data-act="day" data-ds="' + ds + '"><span class="bar" style="background:' + (k === "mix" ? "linear-gradient(180deg," + COLORS.kraft + " 50%," + COLORS.kardio + " 50%)" : COLORS[k]) + '"></span><span class="col"><span class="name">' + esc(summary(list)) + '</span><span class="muted small">' + WDL[weekday(ds)] + ' ' + fmt(ds) + ' · ' + KIND[k] + (pl ? ' · ' + pl : '') + '</span></span></button>');
   }
   return rows.length ? '<section class="list" aria-label="Als Nächstes"><span class="label">Als Nächstes</span>' + rows.join("") + '</section>' : '';
 }
@@ -389,7 +452,7 @@ VIEWS.day = () => {
     const ex = st.ex[id], g = groupOf(ex), e = log[id], ok = entryDone(ex, e);
     const status = ok ? '<span class="status ok">' + I.check + 'erledigt</span>'
       : ex.kind === "kraft" && e && e.sets.length ? '<span class="status">' + e.sets.length + ' von ' + ex.sets + ' Sätzen</span>' : '<span class="status">offen</span>';
-    return '<div class="exrow"><button class="item" data-act="ex" data-ds="' + ds + '" data-id="' + id + '"><span class="sw" style="background:' + g.color + '"></span><span class="col"><span class="name">' + esc(ex.name) + '</span><span class="muted small">' + esc(g.name) + ' · ' + target(ex) + '</span></span>' + status + '</button>' +
+    return '<div class="exrow"><button class="item" data-act="ex" data-ds="' + ds + '" data-id="' + id + '"><span class="sw" style="background:' + g.color + '"></span><span class="col"><span class="name">' + esc(ex.name) + (ex.sample ? '<span class="tagx">Beispiel</span>' : '') + '</span><span class="muted small">' + esc(g.name) + ' · ' + target(ex) + '</span></span>' + status + '</button>' +
       '<button class="icon" data-act="remove" data-id="' + id + '" aria-label="' + esc(ex.name) + ' entfernen">' + I.x + '</button></div>';
   }).join("") + '</div>';
   return html + '<button class="btn ghost" data-act="form">' + I.plus + 'Übung hinzufügen</button>';
@@ -399,7 +462,7 @@ VIEWS.ex = () => {
   const ds = ui.ds, id = ui.id, ex = st.ex[id];
   if (!ex) return head("Übung fehlt") + '<p class="empty">Diese Übung gibt es nicht mehr.</p>';
   const g = groupOf(ex), e = (st.log[ds] || {})[id], last = lastTime(st, id, ds);
-  let html = '<header class="head"><button class="icon" data-act="back" aria-label="Zurück">' + I.back + '</button><div class="col"><h1 class="cond h1">' + esc(ex.name) + '</h1><p class="muted small">' + dayTitle(ds) + '</p></div><span class="chip" style="background:' + g.color + '">' + esc(g.name) + '</span></header>';
+  let html = '<header class="head"><button class="icon" data-act="back" aria-label="Zurück">' + I.back + '</button><div class="col"><h1 class="cond h1">' + esc(ex.name) + '</h1><p class="muted small">' + dayTitle(ds) + (ex.sample ? ' · Beispiel' : '') + '</p></div><span class="chip" style="background:' + g.color + '">' + esc(g.name) + '</span></header>';
   const side = '<aside class="side" aria-label="Ziel und letztes Mal"><div class="panel"><span class="label">Ziel</span>' + (ex.kind === "kraft"
     ? '<span class="num v">' + num(ex.kg) + ' kg</span><span class="small">' + ex.reps + ' Reps</span><span class="small">' + ex.sets + ' Sätze</span>'
     : (ex.track !== "kcal" ? '<span class="num v">' + ex.min + ' min</span>' : '') + (ex.track !== "dauer" ? '<span class="num ' + (ex.track === "kcal" ? 'v' : 'small') + '" style="font-size:' + (ex.track === "kcal" ? '28px' : '18px') + '">' + ex.kcal + ' kcal</span>' : '')) +
@@ -472,16 +535,16 @@ function graph(lines, w, h, shared, label, stretch) {
     const r = shared ? gs : span(l.pts);
     const xy = l.pts.map(p => [P + (t1 > t0 ? (parse(p[0]).getTime() - t0) / (t1 - t0) : .5) * (w - 2 * P), h - P - (r[1] > r[0] ? (p[1] - r[0]) / (r[1] - r[0]) : .5) * (h - 2 * P)]);
     const end = xy[xy.length - 1];
-    return '<polyline points="' + xy.map(q => q[0].toFixed(1) + "," + q[1].toFixed(1)).join(" ") + '" stroke="' + l.color + '"' + (l.dash ? ' stroke-dasharray="' + l.dash + '"' : '') + '/>' +
-      (stretch ? '' : '<circle cx="' + end[0].toFixed(1) + '" cy="' + end[1].toFixed(1) + '" r="4" fill="' + l.color + '" stroke="none"/>');
+    return '<polyline points="' + xy.map(q => q[0].toFixed(1) + "," + q[1].toFixed(1)).join(" ") + '" style="stroke:' + l.color + (l.dash ? ';stroke-dasharray:' + l.dash : '') + '"/>' +
+      (stretch ? '' : '<circle cx="' + end[0].toFixed(1) + '" cy="' + end[1].toFixed(1) + '" r="4" style="fill:' + l.color + ';stroke:none"/>');
   }).join("");
-  return '<svg class="graph" viewBox="0 0 ' + w + ' ' + h + '"' + (stretch ? ' preserveAspectRatio="none"' : '') + ' role="img" aria-label="' + esc(label) + '"><line x1="0" y1="' + (h - 1) + '" x2="' + w + '" y2="' + (h - 1) + '" stroke="#2E2A26" stroke-width="1"/>' + body + '</svg>' +
+  return '<svg class="graph" viewBox="0 0 ' + w + ' ' + h + '"' + (stretch ? ' preserveAspectRatio="none"' : '') + ' role="img" aria-label="' + esc(label) + '"><line x1="0" y1="' + (h - 1) + '" x2="' + w + '" y2="' + (h - 1) + '" style="stroke:var(--line);stroke-width:1"/>' + body + '</svg>' +
     (stretch ? '' : '<div class="axis"><span>' + fmt(iso(new Date(t0))) + '</span><span>' + fmt(iso(new Date(t1))) + '</span></div>');
 }
 const groupSeries = key => series(st, ex => ex.kind === "kraft" && ex.group === key, volume);
 const cardioLines = () => [
   { name: "Dauer", pts: series(st, ex => ex.kind === "kardio", e => Number(e.min) || 0), color: KARDIO.color, dash: "" },
-  { name: "Kalorien", pts: series(st, ex => ex.kind === "kardio", e => Number(e.kcal) || 0), color: "#F4EFE8", dash: "7 5" }
+  { name: "Kalorien", pts: series(st, ex => ex.kind === "kardio", e => Number(e.kcal) || 0), color: "var(--ink)", dash: "7 5" }
 ];
 
 VIEWS.progress = () => {
@@ -501,11 +564,11 @@ VIEWS.progress = () => {
   let lines, legend = "";
   if (g.key === "kardio") {
     lines = cardioLines();
-    legend = lines.map(l => '<div class="row" style="min-height:40px"><svg viewBox="0 0 28 10" style="width:28px;height:10px" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="' + l.color + '"' + (l.dash ? ' stroke-dasharray="' + l.dash + '"' : '') + '/></svg><span class="name">' + l.name + '</span></div>').join("");
+    legend = lines.map(l => '<div class="row" style="min-height:40px"><svg viewBox="0 0 28 10" style="width:28px;height:10px" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" style="stroke:' + l.color + (l.dash ? ';stroke-dasharray:' + l.dash : '') + '"/></svg><span class="name">' + l.name + '</span></div>').join("");
   } else if (prog.single) {
     const ids = Object.keys(st.ex).filter(id => st.ex[id].kind === "kraft" && st.ex[id].group === g.key);
-    lines = ids.map((id, i) => ({ name: st.ex[id].name, pts: series(st, (ex, x) => x === id, volume), color: i % 2 ? "#F4EFE8" : g.color, dash: DASH[Math.floor(i / 2) % DASH.length] })).filter(l => l.pts.length);
-    legend = lines.map(l => '<div class="row" style="min-height:40px"><svg viewBox="0 0 28 10" style="width:28px;height:10px" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="' + l.color + '"' + (l.dash ? ' stroke-dasharray="' + l.dash + '"' : '') + '/></svg><span class="name">' + esc(l.name) + '</span></div>').join("");
+    lines = ids.map((id, i) => ({ name: st.ex[id].name, pts: series(st, (ex, x) => x === id, volume), color: i % 2 ? "var(--ink)" : g.color, dash: DASH[Math.floor(i / 2) % DASH.length] })).filter(l => l.pts.length);
+    legend = lines.map(l => '<div class="row" style="min-height:40px"><svg viewBox="0 0 28 10" style="width:28px;height:10px" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" style="stroke:' + l.color + (l.dash ? ';stroke-dasharray:' + l.dash : '') + '"/></svg><span class="name">' + esc(l.name) + '</span></div>').join("");
   } else lines = [{ pts: groupSeries(g.key), color: g.color }];
   html += '<article class="card"><div class="row" style="justify-content:space-between"><h2 class="cond h2">' + esc(g.name) + '</h2>' +
     (g.key !== "kardio" ? '<button class="switch" role="switch" aria-checked="' + !!prog.single + '" data-act="single">Übungen einzeln<span class="track"><span class="knob"></span></span></button>' : '') + '</div>' +
@@ -516,7 +579,7 @@ VIEWS.progress = () => {
 VIEWS.settings = () => {
   const t = today(), a = planWeek(st, t) === 0;
   const opt = (name, value, text, on) => '<label class="choice"><input type="radio" name="' + name + '" value="' + value + '" data-setting="' + name + '"' + (on ? ' checked' : '') + '><span>' + text + '</span></label>';
-  let html = head("Einstellungen");
+  let html = head("Plan und Sicherung");
   html += '<fieldset class="field"><legend>Plan wiederholt sich</legend><div class="choices">' + opt("rhythm", "1", "Jede Woche", st.rhythm !== 2) + opt("rhythm", "2", "Alle 2 Wochen (A und B)", st.rhythm === 2) + '</div></fieldset>';
   if (st.rhythm === 2) {
     html += '<fieldset class="field"><legend>Diese Woche ist</legend><div class="choices">' + opt("week", "A", "Plan A", a) + opt("week", "B", "Plan B", !a) + '</div></fieldset>' +
@@ -526,7 +589,6 @@ VIEWS.settings = () => {
     '<textarea class="input" id="backup" aria-label="Sicherung als Text" spellcheck="false">' + esc(ui.backup || '') + '</textarea>' +
     '<div class="duo"><button class="btn ghost" data-act="export">Erstellen + kopieren</button><button class="btn ghost" data-act="import">Einspielen</button></div>' +
     '<p class="msg" role="status">' + (ui.msg || '') + '</p></fieldset>';
-  if (canInstall()) html += '<button class="btn ghost" data-act="install">App installieren</button>';
   return html + '<p class="muted small">Version ' + esc(window.WEB_VERSION || "1.0") + (native ? '' : window.claude ? ' · Artifact' : ' · Browser') + '</p>';
 };
 
@@ -545,6 +607,114 @@ function installSheet() {
   sheet('<h2 class="cond h2">App installieren</h2><p>' + how + '</p><p class="muted small">Danach startest du den Trainingsplaner über das Icon. Deine Daten bleiben auf diesem Gerät.</p>' +
     (ios ? '' : '<div class="sep"></div><p class="muted small">Oder die Android-App als Datei. Android fragt beim Öffnen, ob du Apps aus dieser Quelle erlauben willst.</p><a class="btn ghost" href="' + APK_URL + '">Trainingsplaner.apk laden</a>') +
     '<button class="btn ghost" data-act="close">Schließen</button>');
+}
+
+/* Darstellung: Hell, Dunkel oder wie das System. Gilt nur auf diesem Gerät. Ohne Wahl dunkel wie in der Probe. */
+const THEME_KEY = "trainingsplaner.theme";
+let hostTheme = document.documentElement.getAttribute("data-theme");
+let themeChoice = kv.get(THEME_KEY, "dark");
+const sysLight = window.matchMedia("(prefers-color-scheme: light)");
+const themeNow = () => themeChoice || hostTheme || (sysLight.matches ? "light" : "dark");
+function applyTheme() { document.documentElement.setAttribute("data-theme", themeNow()); }
+new MutationObserver(() => {
+  const now = document.documentElement.getAttribute("data-theme");
+  if (now === themeNow()) return;
+  if (!themeChoice) hostTheme = now;   // der Artifact-Viewer stellt sein Design um
+  else applyTheme();                   // eigene Wahl bleibt
+}).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+if (sysLight.addEventListener) sysLight.addEventListener("change", () => { if (!themeChoice) applyTheme(); });
+applyTheme();
+
+/* Updates (nur Android-App): beim Start im Hintergrund nachsehen; gibt es eins, steht eine rote 1 am Zahnrad und am Knopf.
+   Heruntergeladen wird im Browser, die App installiert nichts selbst (sonst blockiert Play Protect sie, Erfahrung vom Tagesplaner). */
+const app = window.AndroidApp;
+let upd = null, updAsked = false, updTimer = null;
+function updSheet(title, text, notes, canGet) {
+  sheet('<h2 class="cond h2">' + esc(title) + '</h2><p>' + esc(text) + '</p>' +
+    (notes && notes.length ? '<ul style="margin:0;padding-left:20px">' + notes.map(n => '<li>' + esc(n) + '</li>').join("") + '</ul>' : '') +
+    (canGet ? '<button class="btn" data-act="updget">Herunterladen</button>' : '') + '<button class="btn ghost" data-act="close">' + (canGet ? 'Später' : 'OK') + '</button>');
+}
+function showUpdate(offline) {
+  if (offline) updSheet("Keine Verbindung", "Ob es ein Update gibt, lässt sich gerade nicht prüfen. Hast du Internet?");
+  else if (upd) updSheet("Update verfügbar", "Version " + upd.name + " ist da, du hast " + app.versionName() + ".", upd.notes, true);
+  else updSheet("Alles aktuell", "Die App ist auf dem neuesten Stand (Version " + app.versionName() + ").");
+}
+if (app) window.appUpdateInfo = body => {
+  let v = null;
+  try { v = JSON.parse(body); } catch (e) { }
+  clearTimeout(updTimer);
+  upd = v && +v.code > app.versionCode() ? v : null;
+  render(); refreshPop();
+  if (updAsked) { updAsked = false; showUpdate(!v); }
+  // pro neuer Version einmal von selbst, aber nicht über ein offenes Fenster (z. B. „Update erfolgreich!“), dann beim nächsten Start
+  else if (upd && !$(".sheet-wrap") && kv.get("trainingsplaner.updGezeigt", 0) !== +upd.code) { kv.set("trainingsplaner.updGezeigt", +upd.code); showUpdate(); }
+};
+
+/* Zahnrad-Menü */
+const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+function popHtml() {
+  let h = '<span class="label">Darstellung</span><div class="segctl" role="group" aria-label="Darstellung">' +
+    [["light", "Hell"], ["dark", "Dunkel"], ["", "Wie System"]].map(o => '<button data-act="theme" data-v="' + o[0] + '" aria-pressed="' + (themeChoice === o[0]) + '">' + o[1] + '</button>').join("") + '</div>';
+  h += '<span class="label">Benachrichtigungen</span>';
+  if (native) {
+    h += '<label class="check"><input type="checkbox" data-rm="on"' + (rm.on ? ' checked' : '') + '>Trainings-Erinnerung</label>';
+    if (rm.on) h += '<p class="muted small">Nur an Tagen mit Training. Feld leer lassen: an diesem Wochentag keine Erinnerung.</p><div class="times">' +
+      WD.map((d, i) => '<label for="rm-' + i + '" class="small">' + d + '</label><input type="time" id="rm-' + i + '" data-rm="' + i + '" value="' + esc(rm.times[i] || "") + '">').join("") + '</div>';
+  } else h += '<p class="muted small">Gibt es nur in der Android-App.</p>' + (ios ? '' : '<a class="soft" href="' + APK_URL + '">Android-App laden</a>');
+  if (app || canInstall()) {
+    h += '<span class="label">App</span>';
+    if (app) h += '<button class="soft" data-act="updcheck">' + (updAsked ? 'Sucht …' : 'Nach Updates suchen') + (upd ? '<b class="badge">1</b>' : '') + '</button>';
+    if (canInstall()) h += '<button class="soft" data-act="install">App installieren</button>';
+  }
+  h += '<span class="label">Plan</span><button class="soft" data-act="plan">Rhythmus und Sicherung</button>';
+  h += '<span class="label">Hilfe</span><button class="soft" data-act="tour">Tutorial starten</button>';
+  return h + '<p class="muted small">Version ' + esc(app ? app.versionName() : (window.WEB_VERSION || "1.0")) + (app ? '' : window.claude ? ' · Artifact' : window.WEB_APP ? ' · Web-App' : ' · Browser') + '</p>';
+}
+function placePop(p) {
+  const b = document.getElementById("set-btn");
+  if (!b) return;
+  const r = b.getBoundingClientRect(), w = p.offsetWidth;
+  p.style.top = Math.round(r.bottom + 8) + "px";
+  p.style.left = Math.round(Math.max(12, Math.min(r.right - w, window.innerWidth - w - 12))) + "px";
+}
+function openPop() {
+  closePop();
+  const p = document.createElement("div");
+  p.className = "pop"; p.setAttribute("role", "dialog"); p.setAttribute("aria-label", "Einstellungen");
+  p.innerHTML = popHtml(); document.body.append(p); placePop(p);
+  const b = document.getElementById("set-btn"); if (b) b.setAttribute("aria-expanded", "true");
+  p.querySelector("button, input").focus();
+}
+function closePop() {
+  const p = $(".pop"); if (!p) return;
+  p.remove();
+  const b = document.getElementById("set-btn"); if (b) b.setAttribute("aria-expanded", "false");
+}
+function refreshPop() { const p = $(".pop"); if (p) { p.innerHTML = popHtml(); placePop(p); } }
+document.addEventListener("click", e => { if ($(".pop") && !e.target.closest(".pop, #set-btn")) closePop(); }, true);
+document.addEventListener("scroll", e => { if ($(".pop") && !(e.target.closest && e.target.closest(".pop"))) closePop(); }, true);
+window.addEventListener("resize", closePop);
+
+/* Kurzes Tutorial: beim ersten Öffnen einmal von selbst, sonst über das Zahnrad */
+const TOUR = [
+  [0, "Deine Woche", "Orange ist Kraft, Blau Kardio, Grau Ruhetag, Dunkelrot ein verpasster Tag. Tippe auf einen Tag, dann öffnet er sich in der Mitte."],
+  [1, "Übung eintragen", "Hier trägst du jeden Satz ein. Plus und Minus ändern Gewicht und Wiederholungen. Daneben oder darunter stehen dein Ziel und was du letztes Mal geschafft hast."],
+  [2, "Fortschritt", "Die Linien zeigen, wie viel Gewicht du über die Zeit bewegst. Tippe auf eine Gruppe, um nur sie zu sehen, auch einzeln nach Übungen."],
+  [0, "Wischen und Zahnrad", "Auf dem Handy wischst du zwischen den drei Bereichen, quer siehst du zwei. Im Zahnrad findest du Hell und Dunkel, Erinnerungen, Updates und dieses Tutorial. Die zwei Beispielübungen kannst du jederzeit entfernen."]
+];
+let tourAt = -1;
+function tour(i) {
+  document.querySelectorAll(".pane.focus").forEach(p => p.classList.remove("focus"));
+  const old = $(".tour"); if (old) old.remove();
+  if (i < 0 || i >= TOUR.length) { tourAt = -1; kv.set("trainingsplaner.tutorial", 1); return; }
+  tourAt = i;
+  const s = TOUR[i];
+  document.getElementById(PANES[s[0]]).classList.add("focus"); show(s[0]);
+  const c = document.createElement("div");
+  c.className = "tour"; c.setAttribute("role", "dialog"); c.setAttribute("aria-label", "Tutorial");
+  c.innerHTML = '<span class="label">Tutorial · ' + (i + 1) + ' von ' + TOUR.length + '</span><h2 class="cond h2">' + s[1] + '</h2><p>' + s[2] + '</p>' +
+    '<div class="duo"><button class="btn ghost" data-act="tourend">Beenden</button><button class="btn" data-act="tournext">' + (i === TOUR.length - 1 ? 'Fertig' : 'Weiter') + '</button></div>';
+  document.body.append(c); c.querySelector('[data-act="tournext"]').focus();
 }
 
 /* Fenster unten und Rückgängig-Hinweis */
@@ -608,6 +778,28 @@ const ACT = {
       '<button class="btn ghost" data-act="close">Abbrechen</button>');
   },
   close: () => closeSheet(),
+  pop: () => { if ($(".pop")) closePop(); else openPop(); },
+  theme: d => { themeChoice = d.v; kv.set(THEME_KEY, themeChoice); applyTheme(); refreshPop(); },
+  updcheck: () => {
+    closePop(); updAsked = true;
+    clearTimeout(updTimer);
+    updTimer = setTimeout(() => { if (!updAsked) return; updAsked = false; showUpdate(true); }, 6000);   // spätestens nach 6 Sekunden eine Antwort
+    app.checkUpdate();
+  },
+  updget: () => { if (!upd) return; app.openDownload(upd.name); closeSheet(); toast("Download im Browser: Trainingsplaner-" + upd.name + ".apk öffnen und installieren"); },
+  plan: () => { closePop(); go({ view: "settings" }); },
+  tour: () => { closePop(); tour(0); },
+  tournext: () => tour(tourAt + 1),
+  tourend: () => tour(-1),
+  nosamples: () => {
+    const undo = snapshot(), ids = Object.keys(st.ex).filter(id => st.ex[id].sample);
+    ids.forEach(id => delete st.ex[id]);
+    st.plan.forEach(w => w.forEach((day, i) => { w[i] = day.filter(id => ids.indexOf(id) < 0); }));
+    Object.keys(st.days).forEach(ds => { st.days[ds] = st.days[ds].filter(id => ids.indexOf(id) < 0); });
+    Object.keys(st.log).forEach(ds => { ids.forEach(id => delete st.log[ds][id]); if (!Object.keys(st.log[ds]).length) delete st.log[ds]; });
+    if (ui.id && ids.indexOf(ui.id) >= 0) ui = startMid();
+    save(); render(); toast("Beispiele entfernt", undo);
+  },
   install: () => {
     if (!installPrompt) return installSheet();
     installPrompt.prompt();
@@ -671,6 +863,12 @@ document.addEventListener("input", e => {
 });
 document.addEventListener("change", e => {
   const el = e.target;
+  if (el.dataset.rm != null) {
+    if (el.dataset.rm === "on") { rm.on = el.checked; if (rm.on && app && app.askNotify) app.askNotify(); refreshPop(); }
+    else rm.times[+el.dataset.rm] = el.value;
+    writeReminders();
+    return;
+  }
   if (el.dataset.radio) { ui.f[el.dataset.radio] = el.value; ui.msg = ""; render(); const n = document.querySelector('[data-radio="' + el.dataset.radio + '"]:checked'); if (n) n.focus(); }
   if (el.dataset.setting === "rhythm") { st.rhythm = Number(el.value); save(); render(); }
   if (el.dataset.setting === "week") { const m = monday(today()); st.start = el.value === "A" ? m : addDays(m, -7); save(); render(); }
@@ -681,7 +879,23 @@ document.addEventListener("keydown", e => {
 });
 
 render();
+// Start immer ganz links bei der Woche
+deck.scrollLeft = 0;
+requestAnimationFrame(() => { deck.scrollLeft = 0; depth(); });
 depth();
+if (firstRun) save(); else writeReminders();
+if (app) {
+  // Nach einem Update einmal „Update erfolgreich!“ mit den Neuerungen dieser Version
+  const cur = app.versionCode(), last = kv.get("trainingsplaner.appVersion", 0);
+  if (last ? last < cur : app.wasUpdated()) {
+    let notes = [];
+    try { notes = (JSON.parse(app.patchNotes()).find(x => +x.code === cur) || {}).notes || []; } catch (e) { }
+    updSheet("Update erfolgreich!", "Du hast jetzt Version " + app.versionName() + ".", notes);
+  }
+  kv.set("trainingsplaner.appVersion", cur);
+  app.checkUpdate();
+}
+if (firstRun && !kv.get("trainingsplaner.tutorial", 0)) setTimeout(() => tour(0), 400);
 if (!native) { try { navigator.storage && navigator.storage.persist && navigator.storage.persist().catch(() => { }); } catch (e) { } }
 if (!native && window.claude && window.claude.use) {
   window.claude.use("db").then(async d => {
