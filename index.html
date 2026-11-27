@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Trainingsplaner</title>
-<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Trainingsplaner"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.8.4";window.WEB_CODE=13;window.WEB_NOTES=["Gewicht-Rad: keine doppelte Zahl mehr in der Mitte, ruhigeres Einrasten","Weicher, leicht unscharfer Übergang zum unteren Bildschirmrand"];window.WEB_APP=true</script>
+<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Trainingsplaner"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.8.5";window.WEB_CODE=14;window.WEB_NOTES=["Unschärfe am unteren Rand nimmt nach unten zu und läuft nach oben glatt ins Scharfe aus, insgesamt etwas schwächer"];window.WEB_APP=true</script>
 <style>
 /* Kraftraum: warmes Fast-Schwarz, orangegraue Flächen, Orange als Akzent. Drei Bereiche nebeneinander: Woche, Tag/Übung, Fortschritt.
    Breit: alle drei sichtbar. Mittel (Handy quer, Tablet): zwei und ein Rand. Schmal: einer, links/rechts ein Rand, wischen. */
@@ -22,9 +22,12 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--canvas);color:va
 /* fixed + inset:0 statt 100dvh: auf dem iPhone als Web-App war 100dvh kürzer als der Bildschirm, unten blieb ein schwarzer Streifen */
 .deck{--peek:40px;--lap:20px;position:fixed;inset:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
 .deck::-webkit-scrollbar{display:none}
-/* Weicher Übergang zum unteren Bildschirmrand: Inhalt darunter wird leicht unscharf und dunkel */
-body::after{content:"";position:fixed;left:0;right:0;bottom:0;height:calc(36px + env(safe-area-inset-bottom,0px));z-index:5;pointer-events:none;background:linear-gradient(to bottom,transparent,var(--bg));
-  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);-webkit-mask-image:linear-gradient(to bottom,transparent,#000 70%);mask-image:linear-gradient(to bottom,transparent,#000 70%)}
+/* Weicher Übergang zum unteren Bildschirmrand: drei Schichten mit zunehmender Unschärfe (oben fast scharf, unten 2,25 px), darüber ein Verlauf in die Hintergrundfarbe */
+.edge{position:fixed;left:0;right:0;bottom:0;height:calc(48px + env(safe-area-inset-bottom,0px));z-index:5;pointer-events:none;background:linear-gradient(to bottom,transparent 20%,var(--bg))}
+.edge i{position:absolute;inset:0;-webkit-backdrop-filter:blur(var(--b));backdrop-filter:blur(var(--b));-webkit-mask-image:var(--m);mask-image:var(--m)}
+.edge i:nth-child(1){--b:.75px;--m:linear-gradient(to bottom,transparent,#000 30%,#000 50%,transparent 65%)}
+.edge i:nth-child(2){--b:1.5px;--m:linear-gradient(to bottom,transparent 35%,#000 55%,#000 72%,transparent 85%)}
+.edge i:nth-child(3){--b:2.25px;--m:linear-gradient(to bottom,transparent 60%,#000 85%)}
 /* iOS 26, installierte Web-App mit durchsichtiger Statusleiste: das Fenster ist um die Statusleiste zu kurz (unten abgeschnitten). 100lvh ist dort die volle Höhe. Bei undurchsichtiger Statusleiste ist der Abstand oben 0, dann bleibt es bei 100 %. */
 @media (display-mode:standalone){@supports (height:100lvh){.deck{bottom:auto;height:min(100lvh,calc(100% + env(safe-area-inset-top,0px)))}}}
 .pane{position:relative;flex:0 0 calc(100vw - 2*var(--peek));height:100%;overflow-y:auto;scroll-snap-align:center;background:var(--bg);border-inline:1px solid var(--line);box-shadow:0 0 32px var(--shadow);
@@ -182,6 +185,7 @@ textarea.input{height:120px;padding:10px;font:12px/1.4 ui-monospace,Consolas,mon
 <section class="pane" id="p-mid" aria-label="Tag und Übung" aria-live="polite"></section>
 <section class="pane" id="p-prog" aria-label="Fortschritt"></section>
 </main>
+<div class="edge" aria-hidden="true"><i></i><i></i><i></i></div>
 <script>
 /*LOGIK*/
 const GROUPS = [
