@@ -1,6 +1,6 @@
 // Hält die Web-App offline bereit. Bei jedem Bau ändert build-web.ps1 die Version, dann holt sich das Handy die neuen Dateien.
 // Die Seite selbst kommt mit Internet immer frisch vom Server, ohne Internet aus dem Speicher.
-const CACHE = "trainingsplaner-20261128192935";
+const CACHE = "trainingsplaner-20261128193444";
 const FILES = ["./", "index.html", "manifest.webmanifest", "barlow-400.woff2", "barlow-500.woff2", "barlow-600.woff2", "barlowcond-600.woff2", "barlowcond-700.woff2", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 
 // "reload": am Browser-Zwischenspeicher vorbei, sonst landet eine bis zu 10 Minuten alte Kopie im Offline-Speicher

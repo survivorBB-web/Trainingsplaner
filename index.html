@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Trainingsplaner</title>
-<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Trainingsplaner"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.10";window.WEB_CODE=18;window.WEB_NOTES=["Graphen mit feinem Raster, Monaten unten und Volumen links","Rechts steht immer heute: klein 3 Monate, groß 4 Monate","Großen Graphen mit dem Finger verschieben, Zurück zu heute","Kardio groß: Dauer und Kalorien je eigener Graph"];window.WEB_APP=true</script>
+<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Trainingsplaner"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.10.1";window.WEB_CODE=19;window.WEB_NOTES=["Graphen ruhiger: weniger Rasterlinien, nur Monate und Linien mit Zahl"];window.WEB_APP=true</script>
 <style>
 /* Kraftraum: warmes Fast-Schwarz, orangegraue Flächen, Orange als Akzent. Drei Bereiche nebeneinander: Woche, Tag/Übung, Fortschritt.
    Breit: alle drei sichtbar. Mittel (Handy quer, Tablet): zwei und ein Rand. Schmal: einer, links/rechts ein Rand, wischen. */
@@ -142,7 +142,6 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.2;stroke
 .ctitle+.chart.big{height:170px}
 .graph{display:block;width:100%;height:100%;stroke:none;font-variant-numeric:tabular-nums}
 .graph text{fill:var(--muted)}
-.graph .gf{stroke:var(--line);stroke-width:1;opacity:.45}
 .graph .gl{stroke:var(--line);stroke-width:1}
 .ctitle{margin:4px 0 0;display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
 .graph polyline{fill:none;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke}
@@ -673,22 +672,19 @@ function drawChart(el) {
   const upp = (hi - lo) / ph, pan = c.pan;
   pan.d = Math.max(0, Math.min(pan.d, Math.max(0, (now - Math.min.apply(null, pts.map(p => p[0]))) / DAY - days + 10)));
   pan.v = Math.max(Math.max(vmin - hi, -lo), Math.min(pan.v, vmax - lo));
-  const step = gridStep(base, upp, big ? 8 : 5), lstep = gridStep(step, upp, big ? 16 : 12), v0 = lo + pan.v, v1 = hi + pan.v;
+  const step = gridStep(base, upp, big ? 8 : 5), lstep = gridStep(step, upp, big ? 24 : 14), v0 = lo + pan.v, v1 = hi + pan.v;
   const de = n => n.toLocaleString("de-DE");
   const L = Math.ceil(String(de(Math.floor(v1 / lstep) * lstep)).length * fs * .58) + 8, pw = W - L - R, ppd = pw / days;
   el._k = { ppd, upp };
   const X = t => L + pw - ((now - t) / DAY - pan.d) * ppd, Y = v => T + ph - (v - v0) / upp, f = n => n.toFixed(1);
   let g = "";
-  for (let v = Math.ceil(v0 / step) * step; v <= v1; v += step) {
-    const y = Y(v), lab = Math.round(v / lstep) * lstep === Math.round(v);
-    g += '<line class="' + (lab ? 'gl' : 'gf') + '" x1="' + L + '" x2="' + (L + pw) + '" y1="' + f(y) + '" y2="' + f(y) + '"/>';
-    if (lab && y > T + fs / 2) g += '<text x="' + (L - 5) + '" y="' + f(y + fs * .35) + '" text-anchor="end">' + de(Math.round(v)) + '</text>';
+  // nur Linien mit Zahl (Ben: weniger Linien)
+  for (let v = Math.ceil(v0 / lstep) * lstep; v <= v1; v += lstep) {
+    const y = Y(v);
+    g += '<line class="gl" x1="' + L + '" x2="' + (L + pw) + '" y1="' + f(y) + '" y2="' + f(y) + '"/>';
+    if (y > T + fs / 2) g += '<text x="' + (L - 5) + '" y="' + f(y + fs * .35) + '" text-anchor="end">' + de(Math.round(v)) + '</text>';
   }
   const left = new Date(now - (days + pan.d + 31) * DAY);
-  for (let d = parse(monday(iso(left))); d.getTime() <= now; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 7)) {
-    const x = X(d.getTime());
-    if (x >= L && x <= L + pw) g += '<line class="gf" x1="' + f(x) + '" x2="' + f(x) + '" y1="' + T + '" y2="' + (T + ph) + '"/>';
-  }
   for (let d = new Date(left.getFullYear(), left.getMonth(), 1); d.getTime() <= now; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) {
     const x = X(d.getTime());
     if (x < L || x > L + pw) continue;
