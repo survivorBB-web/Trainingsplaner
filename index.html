@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Trainingsplaner</title>
-<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Trainingsplaner"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.10.2";window.WEB_CODE=20;window.WEB_NOTES=["Fortschritt ohne Auswahl-Knöpfe: Graph antippen öffnet ihn groß, Pfeil oben führt zurück"];window.WEB_APP=true</script>
+<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Trainingsplaner"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.10.3";window.WEB_CODE=21;window.WEB_NOTES=["Nacken ist jetzt eine eigene Muskelgruppe, getrennt von Schultern"];window.WEB_APP=true</script>
 <style>
 /* Kraftraum: warmes Fast-Schwarz, orangegraue Flächen, Orange als Akzent. Drei Bereiche nebeneinander: Woche, Tag/Übung, Fortschritt.
    Breit: alle drei sichtbar. Mittel (Handy quer, Tablet): zwei und ein Rand. Schmal: einer, links/rechts ein Rand, wischen. */
@@ -207,7 +207,8 @@ const GROUPS = [
   { key: "or", name: "Oberer Rücken", color: "#AFC3EE", muscles: "Latissimus, Trapez, Rautenmuskeln, hintere Schulter" },
   { key: "bauch", name: "Bauch", color: "#EEDC8E", muscles: "Gerader Bauchmuskel, schräge Bauchmuskeln" },
   { key: "brust", name: "Brust", color: "#F6B99A", muscles: "Großer und kleiner Brustmuskel" },
-  { key: "schulter", name: "Schultern & Nacken", color: "#C8B4EA", muscles: "Vordere, seitliche und hintere Schulter, oberer Trapez" },
+  { key: "schulter", name: "Schultern", color: "#C8B4EA", muscles: "Vordere, seitliche und hintere Schulter" },
+  { key: "nacken", name: "Nacken", color: "#D8A8A0", muscles: "Oberer Trapez, Nackenstrecker" },
   { key: "arme", name: "Arme", color: "#9FD9E2", muscles: "Bizeps, Trizeps, Unterarme" }
 ];
 // Typische Splits: eine Übung kann statt einer Muskelgruppe einen Split haben. Gespeichert wie eine Gruppe (ex.group = key).
