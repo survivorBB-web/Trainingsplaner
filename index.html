@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Trainingsplaner</title>
-<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Trainingsplaner"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.10.1";window.WEB_CODE=19;window.WEB_NOTES=["Graphen ruhiger: weniger Rasterlinien, nur Monate und Linien mit Zahl"];window.WEB_APP=true</script>
+<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Trainingsplaner"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.10.2";window.WEB_CODE=20;window.WEB_NOTES=["Fortschritt ohne Auswahl-Knöpfe: Graph antippen öffnet ihn groß, Pfeil oben führt zurück"];window.WEB_APP=true</script>
 <style>
 /* Kraftraum: warmes Fast-Schwarz, orangegraue Flächen, Orange als Akzent. Drei Bereiche nebeneinander: Woche, Tag/Übung, Fortschritt.
    Breit: alle drei sichtbar. Mittel (Handy quer, Tablet): zwei und ein Rand. Schmal: einer, links/rechts ein Rand, wischen. */
@@ -724,9 +724,8 @@ const cardioLines = () => [
 
 VIEWS.progress = () => {
   const all = [KARDIO].concat(GROUPS, SPLITS.filter(s => Object.keys(st.ex).some(id => st.ex[id].kind === "kraft" && st.ex[id].group === s.key)));
-  let html = '<header class="head"><div class="col"><h1 class="cond h1">Fortschritt</h1><p class="muted small">Bewegtes Gesamtgewicht, ohne Einheiten</p></div></header>';
-  html += '<div class="tabs" role="tablist" aria-label="Graph wählen">' + [{ key: "alle", name: "Alle" }].concat(all).map(g =>
-    '<button class="tab" role="tab" aria-selected="' + (prog.sel === g.key) + '" data-act="sel" data-key="' + g.key + '">' + (g.color ? '<span class="dot" style="background:' + g.color + '"></span>' : '') + esc(g.name) + '</button>').join("") + '</div>';
+  // Keine Auswahl-Knöpfe (Ben): Graph antippen öffnet ihn groß, der Pfeil führt zurück zur Übersicht
+  let html = '<header class="head">' + (prog.sel !== "alle" ? '<button class="icon" data-act="sel" data-key="alle" aria-label="Zurück zu allen Graphen">' + I.back + '</button>' : '') + '<div class="col"><h1 class="cond h1">Fortschritt</h1><p class="muted small">Bewegtes Gesamtgewicht, ohne Einheiten</p></div></header>';
   if (prog.sel === "alle") {
     html += '<div class="list">' + all.map(g => {
       const cl = g.key === "kardio" ? cardioLines() : null;
