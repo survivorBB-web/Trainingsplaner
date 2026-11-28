@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Trainingsplaner</title>
-<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Trainingsplaner"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.8.7";window.WEB_CODE=16;window.WEB_NOTES=["Tag öffnen und Weiter mit …: die Seite gleitet weich zur nächsten, statt zu springen"];window.WEB_APP=true</script>
+<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Trainingsplaner"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.9";window.WEB_CODE=17;window.WEB_NOTES=["Neue Seite Trainingsplan: alle Wochentage auf einen Blick, bei A/B mit Umschalter, Übungen anlegen, Ziele ändern, aus dem Plan nehmen (Knopf in der Woche)","Fertig-Knopf beim Üben: schließt die Übung ab, auch mit weniger Sätzen, und geht zur nächsten","Graph neu starten: ältere Einträge ausblenden, nicht löschen, jederzeit wieder einblenden","iPhone: Überschriften sitzen etwas tiefer, nicht mehr in der Unschärfe oben"];window.WEB_APP=true</script>
 <style>
 /* Kraftraum: warmes Fast-Schwarz, orangegraue Flächen, Orange als Akzent. Drei Bereiche nebeneinander: Woche, Tag/Übung, Fortschritt.
    Breit: alle drei sichtbar. Mittel (Handy quer, Tablet): zwei und ein Rand. Schmal: einer, links/rechts ein Rand, wischen. */
@@ -40,6 +40,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--canvas);color:va
 .pane:last-child{flex-basis:calc(100vw - var(--peek));scroll-snap-align:end;border-right:none;padding-right:max(16px,env(safe-area-inset-right,0px))}
 @media (min-width:700px){.deck{--peek:56px;--lap:0px}.pane,.pane:first-child,.pane:last-child{flex-basis:calc((100vw - var(--peek))/2)}.pane{scroll-snap-align:start}.pane:last-child{scroll-snap-align:end}}
 @media (min-width:1100px){.deck{overflow-x:hidden;scroll-snap-type:none}.pane,.pane:first-child,.pane:last-child{flex:1 1 0;min-width:0;margin-left:0;box-shadow:none;border-left:none;border-right:1px solid var(--line);padding:max(24px,env(safe-area-inset-top,0px)) 20px 48px}.pane:last-child{border-right:none}}
+@media (display-mode:standalone){.pane{padding-top:calc(max(20px,env(safe-area-inset-top,0px)) + 24px)}}
 h1,h2,p{margin:0}
 .cond,.label,.btn,.tab,.chip{font-family:var(--cond);font-weight:700;text-transform:uppercase;letter-spacing:.01em}
 .num{font-family:var(--cond);font-weight:600;font-variant-numeric:tabular-nums}
@@ -89,6 +90,12 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.2;stroke
 .exrow{display:flex;gap:6px;align-items:stretch}
 .exrow .item{flex:1}
 .exrow .icon{height:auto;min-height:48px;background:var(--surface);color:var(--muted)}
+.btn.slim{min-height:44px;font-size:16px}
+.pday{background:var(--surface);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.pday-h{display:flex;align-items:center;gap:10px;min-height:44px}
+.pday-h .icon{width:44px;height:44px;background:var(--raise);flex-shrink:0}
+.pday-h .cond{font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;flex:1}
+.pday .item,.pday .exrow .icon{background:var(--raise);min-height:52px}
 .status{font-size:13px;color:var(--muted);text-align:right;white-space:nowrap}
 .status.ok{color:var(--ok);display:flex;align-items:center;gap:4px}
 .status svg{width:18px;height:18px}
@@ -231,6 +238,7 @@ function dayList(st, ds) {
 const hasEntry = e => !!e && ((e.sets && e.sets.length > 0) || e.min > 0 || e.kcal > 0);
 function entryDone(ex, e) {
   if (!e) return false;
+  if (e.done) return hasEntry(e);   // mit „Fertig“ beendet, auch wenn weniger Sätze als geplant
   return ex.kind === "kardio" ? hasEntry(e) : (e.sets || []).length >= (ex.sets || 1);
 }
 function hasLog(st, ds) { const l = st.log[ds] || {}; return Object.keys(l).some(id => hasEntry(l[id])); }
@@ -243,8 +251,9 @@ function dayKind(st, ds, today) {
 }
 // Bewegtes Gewicht: Summe aus Gewicht × Wiederholungen. Körpergewicht (0 kg) ergibt 0 und zählt nicht.
 function volume(e) { return ((e && e.sets) || []).reduce((s, x) => s + (Number(x.kg) || 0) * (Number(x.reps) || 0), 0); }
-function series(st, test, value) {
-  return Object.keys(st.log).sort().map(ds => {
+// from: Graph neu gestartet an diesem Tag, ältere Tage zählen nicht mit
+function series(st, test, value, from) {
+  return Object.keys(st.log).filter(ds => !from || ds >= from).sort().map(ds => {
     let sum = 0;
     for (const id in st.log[ds]) { const ex = st.ex[id]; if (ex && test(ex, id)) sum += value(st.log[ds][id], ex) || 0; }
     return sum > 0 ? [ds, sum] : null;
@@ -507,6 +516,7 @@ VIEWS.week = () => {
     '<div class="tiles" role="group" aria-label="Tage der Woche">' + tiles + '</div>';
   if (weekOff !== 0) html += '<button class="btn ghost" data-act="thisweek">Zur aktuellen Woche</button>';
   else html += todayCard(t) + upcoming(t);
+  html += '<button class="btn ghost" data-act="planview">' + I.plus + 'Trainingsplan bearbeiten</button>';
   if (Object.keys(st.ex).some(id => st.ex[id].sample)) html += '<button class="btn ghost" data-act="nosamples">Beispiele entfernen</button>';
   html += '<div class="legend">' + [["Kraft", COLORS.kraft], ["Kardio", COLORS.kardio], ["Ruhetag", COLORS.rest], ["Verpasst", COLORS.missed]].map(l => '<span><span class="sw" style="background:' + l[1] + '"></span>' + l[0] + '</span>').join("") + '</div>';
   return html;
@@ -569,15 +579,17 @@ VIEWS.ex = () => {
       ? '<span class="num v">' + num(Math.max.apply(null, last.e.sets.map(s => s.kg))) + ' kg</span><span class="num" style="font-size:17px">' + last.e.sets.map(s => s.reps).join(" · ") + '</span>'
       : (last.e.min > 0 ? '<span class="num v">' + last.e.min + ' min</span>' : '') + (last.e.kcal > 0 ? '<span class="num" style="font-size:18px">' + last.e.kcal + ' kcal</span>' : ''))
       : '<span class="small muted">Noch kein Eintrag</span>') + '</div></aside>';
+  const list = dayList(st, ds), log = st.log[ds] || {}, after = list.slice(list.indexOf(id) + 1).concat(list.slice(0, list.indexOf(id))).find(x => !entryDone(st.ex[x], log[x]));
   if (ex.kind === "kraft") {
-    const sets = (e && e.sets) || [], n = sets.length, lastSet = sets[n - 1];
+    const sets = (e && e.sets) || [], n = sets.length, lastSet = sets[n - 1], full = n >= ex.sets;
     if (ui.kg == null) ui.kg = num(lastSet ? lastSet.kg : ex.kg);
     if (ui.reps == null) ui.reps = String(lastSet ? lastSet.reps : ex.reps);
     html += '<div class="exgrid"><div class="panel"><span class="label" style="color:var(--kraft)">' + (n < ex.sets ? 'Satz ' + (n + 1) + ' von ' + ex.sets : 'Extra-Satz ' + (n + 1)) + '</span>' +
       stepper("kg", "Gewicht", "kg", 2.5) + stepper("reps", "Wiederholungen", "", 1) + '</div>' + side + '</div>';
     if (n) html += '<div class="sets">' + sets.map((s, i) => '<span class="setchip"><span class="muted">' + (i + 1) + '</span><span class="num">' + num(s.kg) + ' × ' + s.reps + '</span><button class="x" data-act="delset" data-i="' + i + '" aria-label="Satz ' + (i + 1) + ' löschen">' + I.x + '</button></span>').join("") + '</div>';
-    html += '<p class="msg" role="status">' + (ui.msg || (n >= ex.sets ? 'Alle ' + ex.sets + ' Sätze geschafft.' : '')) + '</p>';
-    html += '<button class="btn big" data-act="saveset">Satz speichern</button>';
+    html += '<p class="msg" role="status">' + (ui.msg || (full ? 'Alle ' + ex.sets + ' Sätze geschafft.' : '')) + '</p>';
+    html += '<button class="btn' + (full ? ' ghost' : ' big') + '" data-act="saveset">' + (full ? 'Extra-Satz speichern' : 'Satz speichern') + '</button>';
+    if (n) html += '<button class="btn' + (full ? ' big' : ' ghost') + '" data-act="finish">' + I.check + (after ? 'Fertig · weiter mit ' + esc(st.ex[after].name) : 'Übung fertig') + '</button>';
   } else {
     if (ui.min == null) ui.min = String(e && e.min ? e.min : ex.min || 0);
     if (ui.kcal == null) ui.kcal = String(e && e.kcal ? e.kcal : ex.kcal || 0);
@@ -587,7 +599,6 @@ VIEWS.ex = () => {
     html += '<button class="btn big" data-act="savecardio">' + (hasEntry(e) ? 'Änderung speichern' : 'Speichern') + '</button>';
     if (hasEntry(e)) html += '<button class="btn ghost" data-act="delcardio">Eintrag löschen</button>';
   }
-  const list = dayList(st, ds), log = st.log[ds] || {}, after = list.slice(list.indexOf(id) + 1).concat(list.slice(0, list.indexOf(id))).find(x => !entryDone(st.ex[x], log[x]));
   if (after) html += '<button class="item" data-act="ex" data-ds="' + ds + '" data-id="' + after + '" style="border:1px solid var(--line);background:transparent"><span class="label">Danach</span><span class="col"><span class="name">' + esc(st.ex[after].name) + '</span></span><span class="num muted" style="font-size:17px">' + target(st.ex[after]) + '</span></button>';
   return html;
 };
@@ -603,10 +614,10 @@ VIEWS.form = () => {
   const f = ui.f, edit = !!ui.id, ds = ui.ds, pl = planLabel(ds);
   const radio = (name, value, text, extra) => '<label class="choice"><input type="radio" name="' + name + '" value="' + value + '" data-radio="' + name + '"' + (f[name] === value ? ' checked' : '') + '><span>' + (extra || '') + text + '</span></label>';
   const numField = (key, label) => '<div class="field"><span>' + label + '</span>' + wheel('<input class="input num" style="font-size:22px" inputmode="decimal" autocomplete="off" data-f="' + key + '" value="' + esc(f[key]) + '" aria-label="' + label + '">', key) + '</div>';
-  let html = head(edit ? "Übung ändern" : "Neue Übung", dayTitle(ds));
+  let html = head(edit ? "Übung ändern" : "Neue Übung", ui.fixed ? "Jeden " + WDL[weekday(ds)] + (pl ? " (" + pl + ")" : "") : dayTitle(ds));
   if (!edit) {
     const inDay = dayList(st, ds), others = Object.keys(st.ex).filter(id => inDay.indexOf(id) < 0).sort((a, b) => st.ex[a].name.localeCompare(st.ex[b].name));
-    html += '<fieldset class="field"><legend>Gilt für</legend><div class="choices">' + radio("scope", "plan", "Jeden " + WDL[weekday(ds)] + (pl ? " (" + pl + ")" : "")) + radio("scope", "day", "Nur am " + fmt(ds)) + '</div></fieldset>';
+    if (!ui.fixed) html += '<fieldset class="field"><legend>Gilt für</legend><div class="choices">' + radio("scope", "plan", "Jeden " + WDL[weekday(ds)] + (pl ? " (" + pl + ")" : "")) + radio("scope", "day", "Nur am " + fmt(ds)) + '</div></fieldset>';
     if (others.length) html += '<fieldset class="field"><legend>Schon angelegt, antippen zum Hinzufügen</legend><div class="choices">' + others.map(id => '<button class="tab" data-act="addexisting" data-id="' + id + '"><span class="dot" style="background:' + groupOf(st.ex[id]).color + '"></span>' + esc(st.ex[id].name) + '</button>').join("") + '</div></fieldset><div class="sep"></div>';
   }
   html += '<label class="field"><span>Name der Übung</span><input class="input" data-f="name" value="' + esc(f.name) + '" placeholder="z. B. Kniebeugen" autocomplete="off"></label>';
@@ -642,10 +653,11 @@ function graph(lines, w, h, shared, label, stretch) {
   return '<svg class="graph" viewBox="0 0 ' + w + ' ' + h + '"' + (stretch ? ' preserveAspectRatio="none"' : '') + ' role="img" aria-label="' + esc(label) + '"><line x1="0" y1="' + (h - 1) + '" x2="' + w + '" y2="' + (h - 1) + '" style="stroke:var(--line);stroke-width:1"/>' + body + '</svg>' +
     (stretch ? '' : '<div class="axis"><span>' + fmt(iso(new Date(t0))) + '</span><span>' + fmt(iso(new Date(t1))) + '</span></div>');
 }
-const groupSeries = key => series(st, ex => ex.kind === "kraft" && ex.group === key, volume);
+const resetOf = key => (st.reset || {})[key] || "";
+const groupSeries = key => series(st, ex => ex.kind === "kraft" && ex.group === key, volume, resetOf(key));
 const cardioLines = () => [
-  { name: "Dauer", pts: series(st, ex => ex.kind === "kardio", e => Number(e.min) || 0), color: KARDIO.color, dash: "" },
-  { name: "Kalorien", pts: series(st, ex => ex.kind === "kardio", e => Number(e.kcal) || 0), color: "var(--ink)", dash: "7 5" }
+  { name: "Dauer", pts: series(st, ex => ex.kind === "kardio", e => Number(e.min) || 0, resetOf("kardio")), color: KARDIO.color, dash: "" },
+  { name: "Kalorien", pts: series(st, ex => ex.kind === "kardio", e => Number(e.kcal) || 0, resetOf("kardio")), color: "var(--ink)", dash: "7 5" }
 ];
 
 VIEWS.progress = () => {
@@ -659,7 +671,10 @@ VIEWS.progress = () => {
       const lines = cl ? [cl[0].pts.length ? cl[0] : cl[1]] : [{ pts: groupSeries(g.key), color: g.color }];
       return '<button class="grow" data-act="sel" data-key="' + g.key + '"><span class="gname"><span class="dot" style="background:' + g.color + '"></span>' + esc(g.name) + '</span><span class="gbox">' + graph(lines, 200, 44, false, "Verlauf " + g.name, true) + '</span></button>';
     }).join("") + '</div>';
-    return html + '<p class="muted small">Übungen mit Körpergewicht (0 kg) zählen nicht mit.</p>';
+    const any = Object.keys(st.reset || {}).length;
+    return html + '<p class="muted small">Übungen mit Körpergewicht (0 kg) zählen nicht mit.</p>' +
+      '<button class="btn ghost" data-act="resetgraph" data-key="alle">Alle Graphen neu starten</button>' +
+      (any ? '<button class="btn ghost slim" data-act="unreset" data-key="alle">Ältere Einträge wieder zeigen</button>' : '');
   }
   const g = all.find(x => x.key === prog.sel) || KARDIO;
   let lines, legend = "";
@@ -668,13 +683,38 @@ VIEWS.progress = () => {
     legend = lines.map(l => '<div class="row" style="min-height:40px"><svg viewBox="0 0 28 10" style="width:28px;height:10px" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" style="stroke:' + l.color + (l.dash ? ';stroke-dasharray:' + l.dash : '') + '"/></svg><span class="name">' + l.name + '</span></div>').join("");
   } else if (prog.single) {
     const ids = Object.keys(st.ex).filter(id => st.ex[id].kind === "kraft" && st.ex[id].group === g.key);
-    lines = ids.map((id, i) => ({ name: st.ex[id].name, pts: series(st, (ex, x) => x === id, volume), color: i % 2 ? "var(--ink)" : g.color, dash: DASH[Math.floor(i / 2) % DASH.length] })).filter(l => l.pts.length);
+    lines = ids.map((id, i) => ({ name: st.ex[id].name, pts: series(st, (ex, x) => x === id, volume, resetOf(g.key)), color: i % 2 ? "var(--ink)" : g.color, dash: DASH[Math.floor(i / 2) % DASH.length] })).filter(l => l.pts.length);
     legend = lines.map(l => '<div class="row" style="min-height:40px"><svg viewBox="0 0 28 10" style="width:28px;height:10px" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" style="stroke:' + l.color + (l.dash ? ';stroke-dasharray:' + l.dash : '') + '"/></svg><span class="name">' + esc(l.name) + '</span></div>').join("");
   } else lines = [{ pts: groupSeries(g.key), color: g.color }];
   html += '<article class="card"><div class="row" style="justify-content:space-between"><h2 class="cond h2">' + esc(g.name) + '</h2>' +
     (g.key !== "kardio" ? '<button class="switch" role="switch" aria-checked="' + !!prog.single + '" data-act="single">Übungen einzeln<span class="track"><span class="knob"></span></span></button>' : '') + '</div>' +
     graph(lines, 320, 200, g.key !== "kardio", "Verlauf " + g.name, false) + (legend ? '<div>' + legend + '</div>' : '') + '</article>';
-  return html + (g.key === "kardio" ? '<p class="muted small">Dauer und Kalorien haben je eine eigene Skala.</p>' : '<p class="muted small">Übungen mit Körpergewicht (0 kg) zählen nicht mit.</p>');
+  const from = resetOf(g.key);
+  return html + (g.key === "kardio" ? '<p class="muted small">Dauer und Kalorien haben je eine eigene Skala.</p>' : '<p class="muted small">Übungen mit Körpergewicht (0 kg) zählen nicht mit.</p>') +
+    (from ? '<p class="muted small">Neu gestartet am ' + fmt(from) + '. Ältere Einträge sind ausgeblendet, nicht gelöscht.</p><button class="btn ghost slim" data-act="unreset" data-key="' + g.key + '">Ältere Einträge wieder zeigen</button>' : '') +
+    '<button class="btn ghost" data-act="resetgraph" data-key="' + g.key + '">Graph neu starten</button>';
+};
+
+/* Trainingsplan: alle sieben Wochentage der Vorlage auf einen Blick, bei A/B mit Umschalter. Übungen anlegen, Ziel ändern, aus dem Plan nehmen. */
+function planDate(p, w) { let d = addDays(monday(today()), w); if (planWeek(st, d) !== p) d = addDays(d, 7); return d; }
+VIEWS.plan = () => {
+  const ab = st.rhythm === 2, p = ab ? (ui.pw || 0) : 0, thisB = planWeek(st, today()) === 1;
+  const opt = (name, value, text, on) => '<label class="choice"><input type="radio" name="' + name + '" value="' + value + '" data-setting="' + name + '"' + (on ? ' checked' : '') + '><span>' + text + '</span></label>';
+  let html = head("Trainingsplan", ab ? "Woche A und B im Wechsel" : "Jede Woche gleich");
+  html += '<fieldset class="field"><legend>Plan wiederholt sich</legend><div class="choices">' + opt("rhythm", "1", "Jede Woche", !ab) + opt("rhythm", "2", "Alle 2 Wochen (A und B)", ab) + '</div></fieldset>';
+  if (ab) html += '<fieldset class="field"><legend>Diese Woche ist</legend><div class="choices">' + opt("week", "A", "Plan A", !thisB) + opt("week", "B", "Plan B", thisB) + '</div></fieldset>' +
+    '<div class="tabs" role="tablist" aria-label="Plan wählen">' + ["A", "B"].map((n, i) => '<button class="tab" role="tab" aria-selected="' + (p === i) + '" data-act="pw" data-p="' + i + '">Plan ' + n + '</button>').join("") + '</div>';
+  for (let w = 0; w < 7; w++) {
+    const ids = st.plan[p][w].filter(id => st.ex[id]), kr = ids.some(id => st.ex[id].kind === "kraft"), ka = ids.some(id => st.ex[id].kind === "kardio");
+    const k = !ids.length ? "rest" : kr && ka ? "mix" : kr ? "kraft" : "kardio";
+    html += '<section class="pday" aria-label="' + WDL[w] + '"><div class="pday-h"><span class="sw" style="background:' + (k === "mix" ? "linear-gradient(90deg," + COLORS.kraft + " 50%," + COLORS.kardio + " 50%)" : COLORS[k]) + '"></span><span class="cond">' + WDL[w] + '</span><span class="muted small">' + KIND[k] + '</span><button class="icon" data-act="planadd" data-ds="' + planDate(p, w) + '" aria-label="Übung am ' + WDL[w] + ' hinzufügen">' + I.plus + '</button></div>' +
+      ids.map(id => { const ex = st.ex[id], g = groupOf(ex);
+        return '<div class="exrow"><button class="item" data-act="planedit" data-id="' + id + '" data-ds="' + planDate(p, w) + '"><span class="sw" style="background:' + g.color + '"></span><span class="col"><span class="name">' + esc(ex.name) + '</span><span class="muted small">' + esc(g.name) + ' · Ziel ' + target(ex) + '</span></span></button>' +
+          '<button class="icon" data-act="planrm" data-id="' + id + '" data-p="' + p + '" data-w="' + w + '" aria-label="' + esc(ex.name) + ' aus dem Plan nehmen">' + I.x + '</button></div>'; }).join("") +
+      '</section>';
+  }
+  if (ab) html += '<button class="btn ghost" data-act="copyab">Plan A nach Plan B kopieren</button>';
+  return html + '<p class="muted small">Der Plan gilt für jede ' + (ab ? (p ? 'B-' : 'A-') : '') + 'Woche. Ziele änderst du mit einem Tipp auf die Übung. Einen einzelnen Tag änderst du über die Woche.</p>';
 };
 
 VIEWS.settings = () => {
@@ -839,6 +879,7 @@ function toast(msg, undo) {
 }
 function snapshot() { const s = JSON.stringify(st); return () => { st = JSON.parse(s); save(); render(); }; }
 
+const newForm = () => ({ name: "", kind: "kraft", group: "", kg: "", reps: "10", sets: "3", track: "dauer", min: "30", kcal: "200", scope: "plan" });
 function addToDay(ds, id, scope) {
   if (scope === "day") st.days[ds] = dayList(st, ds).concat(id);
   else {
@@ -858,10 +899,10 @@ const ACT = {
   sel: d => { prog.sel = d.key; render(); },
   single: () => { prog.single = !prog.single; render(); },
   form: (d, el) => {
-    const ds = d.ds || ui.ds, next = { view: "form", ds: ds, f: { name: "", kind: "kraft", group: "", kg: "", reps: "10", sets: "3", track: "dauer", min: "30", kcal: "200", scope: "plan" } };
+    const ds = d.ds || ui.ds, next = { view: "form", ds: ds, f: newForm() };
     if (el.closest("#p-week")) openMid(next, { view: "day", ds: ds }); else go(next);
   },
-  edit: () => { const ex = st.ex[ui.id]; go({ view: "form", ds: ui.ds, id: ui.id, f: { name: ex.name, kind: ex.kind, group: ex.group || "", kg: num(ex.kg || 0), reps: String(ex.reps || ""), sets: String(ex.sets || ""), track: ex.track || "dauer", min: String(ex.min || 0), kcal: String(ex.kcal || 0) } }); },
+  edit: d => { const id = d.id || ui.id, ex = st.ex[id]; go({ view: "form", ds: d.ds || ui.ds, id: id, fixed: !!d.fixed, f: { name: ex.name, kind: ex.kind, group: ex.group || "", kg: num(ex.kg || 0), reps: String(ex.reps || ""), sets: String(ex.sets || ""), track: ex.track || "dauer", min: String(ex.min || 0), kcal: String(ex.kcal || 0) } }); },
   addexisting: d => { const undo = snapshot(); addToDay(ui.ds, d.id, ui.f.scope); save(); back(); toast(st.ex[d.id].name + " hinzugefügt", undo); },
   saveform: () => {
     const f = ui.f, name = f.name.trim();
@@ -905,6 +946,39 @@ const ACT = {
       .then(r => r && r.update()).catch(() => { }).then(reload, reload);
   },
   plan: () => { closePop(); go({ view: "settings" }); },
+  planview: (d, el) => { if (el.closest("#p-week")) openMid({ view: "plan" }); else go({ view: "plan" }); },
+  pw: d => { ui.pw = Number(d.p); render(); },
+  planadd: d => go({ view: "form", ds: d.ds, fixed: true, f: newForm() }),
+  planedit: d => ACT.edit({ id: d.id, ds: d.ds, fixed: true }),
+  planrm: d => {
+    const undo = snapshot(), arr = st.plan[Number(d.p)][Number(d.w)], i = arr.indexOf(d.id), name = st.ex[d.id].name;
+    if (i >= 0) arr.splice(i, 1);
+    save(); render(); toast(name + " aus dem Plan genommen", undo);
+  },
+  finish: () => {
+    const ds = ui.ds, id = ui.id, e = (st.log[ds] || {})[id];
+    if (!e) return;
+    const undo = snapshot(), name = st.ex[id].name;
+    e.done = true; save();
+    const list = dayList(st, ds), log = st.log[ds], i = list.indexOf(id), nx = list.slice(i + 1).concat(list.slice(0, i)).find(x => !entryDone(st.ex[x], log[x]));
+    ui = nx ? { view: "ex", ds: ds, id: nx } : (stack.pop() || { view: "day", ds: ds });
+    render(); $("#p-mid").scrollTop = 0; toast(name + " fertig", undo);
+  },
+  resetgraph: d => {
+    const name = d.key === "alle" ? "Alle Graphen" : (d.key === "kardio" ? KARDIO : CATS.find(c => c.key === d.key) || { name: "Graph" }).name;
+    sheet('<h2 class="cond h2">' + esc(name) + ' neu starten?</h2><p class="muted">Ab heute zählen nur neue Einträge. Ältere Einträge bleiben gespeichert, „Letztes Mal“ zeigt sie weiter, und du kannst sie wieder einblenden.</p>' +
+      '<button class="btn danger" data-act="doreset" data-key="' + d.key + '">Neu starten</button><button class="btn ghost" data-act="close">Abbrechen</button>');
+  },
+  doreset: d => {
+    const undo = snapshot(), r = st.reset || (st.reset = {}), t = today();
+    (d.key === "alle" ? [KARDIO].concat(CATS).map(c => c.key) : [d.key]).forEach(k => { r[k] = t; });
+    save(); closeSheet(); render(); toast(d.key === "alle" ? "Alle Graphen starten heute neu" : "Graph startet heute neu", undo);
+  },
+  unreset: d => {
+    const undo = snapshot();
+    if (d.key === "alle") st.reset = {}; else if (st.reset) delete st.reset[d.key];
+    save(); render(); toast("Ältere Einträge wieder sichtbar", undo);
+  },
   tour: () => { closePop(); tour(0); },
   tournext: () => tour(tourAt + 1),
   tourend: () => tour(-1),
@@ -952,7 +1026,7 @@ const ACT = {
     ui.msg = "Gespeichert."; save(); render();
   },
   delcardio: () => { const undo = snapshot(); delete st.log[ui.ds][ui.id]; ui.msg = ""; save(); render(); toast("Eintrag gelöscht", undo); },
-  copyab: () => { const undo = snapshot(); st.plan[1] = JSON.parse(JSON.stringify(st.plan[0])); save(); toast("Plan A nach B kopiert", undo); },
+  copyab: () => { const undo = snapshot(); st.plan[1] = JSON.parse(JSON.stringify(st.plan[0])); save(); render(); toast("Plan A nach B kopiert", undo); },
   export: () => {
     const text = JSON.stringify(st); ui.backup = text; ui.msg = ""; render();
     const ta = $("#backup"); ta.focus(); ta.select();
