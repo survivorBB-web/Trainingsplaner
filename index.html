@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Trainingsplaner</title>
-<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Trainingsplaner"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.9";window.WEB_CODE=17;window.WEB_NOTES=["Neue Seite Trainingsplan: alle Wochentage auf einen Blick, bei A/B mit Umschalter, Übungen anlegen, Ziele ändern, aus dem Plan nehmen (Knopf in der Woche)","Fertig-Knopf beim Üben: schließt die Übung ab, auch mit weniger Sätzen, und geht zur nächsten","Graph neu starten: ältere Einträge ausblenden, nicht löschen, jederzeit wieder einblenden","iPhone: Überschriften sitzen etwas tiefer, nicht mehr in der Unschärfe oben"];window.WEB_APP=true</script>
+<style>@font-face{font-family:"Barlow";src:url(barlow-400.woff2) format("woff2");font-weight:400;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-500.woff2) format("woff2");font-weight:500;font-display:swap}@font-face{font-family:"Barlow";src:url(barlow-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-600.woff2) format("woff2");font-weight:600;font-display:swap}@font-face{font-family:"Barlow Condensed";src:url(barlowcond-700.woff2) format("woff2");font-weight:700;font-display:swap}</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Trainingsplaner"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="theme-color" content="#121110"><script>window.WEB_VERSION="1.10";window.WEB_CODE=18;window.WEB_NOTES=["Graphen mit feinem Raster, Monaten unten und Volumen links","Rechts steht immer heute: klein 3 Monate, groß 4 Monate","Großen Graphen mit dem Finger verschieben, Zurück zu heute","Kardio groß: Dauer und Kalorien je eigener Graph"];window.WEB_APP=true</script>
 <style>
 /* Kraftraum: warmes Fast-Schwarz, orangegraue Flächen, Orange als Akzent. Drei Bereiche nebeneinander: Woche, Tag/Übung, Fortschritt.
    Breit: alle drei sichtbar. Mittel (Handy quer, Tablet): zwei und ein Rand. Schmal: einer, links/rechts ein Rand, wischen. */
@@ -135,11 +135,17 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.2;stroke
 .dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
 .grow{display:flex;align-items:center;gap:10px;min-height:64px;padding:8px 12px;border-radius:10px;background:var(--surface);border:none;width:100%;text-align:left}
 .grow .gname{width:112px;flex-shrink:0;font-family:var(--cond);font-weight:700;text-transform:uppercase;font-size:16px;line-height:1.1;display:flex;align-items:center;gap:8px}
-.grow .gbox{flex:1;min-width:0;height:44px;display:flex;align-items:center}
-.grow .graph{height:44px}
-.graph{width:100%;height:auto;display:block}
+.grow .gbox{flex:1;min-width:0;min-height:68px;display:flex;align-items:center}
+.chart{display:block;width:100%;height:68px}
+.btn[hidden]{display:none}
+.chart.big{height:230px;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.ctitle+.chart.big{height:170px}
+.graph{display:block;width:100%;height:100%;stroke:none;font-variant-numeric:tabular-nums}
+.graph text{fill:var(--muted)}
+.graph .gf{stroke:var(--line);stroke-width:1;opacity:.45}
+.graph .gl{stroke:var(--line);stroke-width:1}
+.ctitle{margin:4px 0 0;display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
 .graph polyline{fill:none;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke}
-.axis{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
 .nodata{font-size:13px}
 .switch{display:flex;align-items:center;gap:10px;min-height:44px;border:none;background:transparent;padding:0;font-weight:500}
 .switch .track{width:42px;height:24px;border-radius:12px;background:var(--line);padding:3px;display:flex}
@@ -268,6 +274,11 @@ function isoWeek(ds) {
   const y = new Date(d.getFullYear(), 0, 4);
   return 1 + Math.round(((d - y) / 864e5 - 3 + (y.getDay() + 6) % 7) / 7);
 }
+// Raster der Y-Achse: kleinster Schritt base × 1, 2, 5, 10, 20, 50 …, dessen Linien mindestens gap Pixel auseinander liegen. upp = Einheiten pro Pixel.
+function gridStep(base, upp, gap) {
+  if (!(upp > 0) || !isFinite(upp)) return base;
+  for (let m = base; ; m *= 10) for (const k of [1, 2, 5]) if (m * k / upp >= gap) return m * k;
+}
 /*ENDE LOGIK*/
 
 const $ = s => document.querySelector(s);
@@ -350,7 +361,7 @@ function writeReminders() {
 
 /* Drei Bereiche: links die Woche, in der Mitte Tag, Übung, Formular oder Einstellungen (mit eigenem Zurück), rechts der Fortschritt. */
 let weekOff = 0;
-const prog = { sel: "alle", single: false };
+const prog = { sel: "alle", single: false, pan: {} };
 const stack = [];
 // Mitte beim Start wie in der Probe: die nächste offene Übung von heute, sonst der heutige Tag.
 function startMid() {
@@ -375,10 +386,12 @@ window.appBack = () => {
 };
 
 function render() {
+  charts.length = 0;
   [VIEWS.week, VIEWS[ui.view] || VIEWS.day, VIEWS.progress].forEach((view, i) => {
     const el = document.getElementById(PANES[i]), y = el.scrollTop;
     el.innerHTML = view(); el.scrollTop = y; el.querySelectorAll(".wheel").forEach(setupWheel);
   });
+  drawCharts();
 }
 
 /* Wischen auf dem Handy: der Bereich in der Mitte ist voll da, die Nachbarn rücken etwas nach hinten. */
@@ -636,28 +649,81 @@ VIEWS.form = () => {
     (edit ? '<p class="muted small">Das neue Ziel gilt für diese Übung im ganzen Plan.</p>' : '');
 };
 
-function graph(lines, w, h, shared, label, stretch) {
-  const all = [].concat.apply([], lines.map(l => l.pts));
-  if (!all.length) return '<p class="muted nodata">Noch keine Daten</p>';
-  const ts = all.map(p => parse(p[0]).getTime()), t0 = Math.min.apply(null, ts), t1 = Math.max.apply(null, ts);
-  const span = pts => { const v = pts.map(p => p[1]); return [Math.min.apply(null, v), Math.max.apply(null, v)]; };
-  const gs = span(all), P = 6;
-  const body = lines.map(l => {
-    if (!l.pts.length) return "";
-    const r = shared ? gs : span(l.pts);
-    const xy = l.pts.map(p => [P + (t1 > t0 ? (parse(p[0]).getTime() - t0) / (t1 - t0) : .5) * (w - 2 * P), h - P - (r[1] > r[0] ? (p[1] - r[0]) / (r[1] - r[0]) : .5) * (h - 2 * P)]);
-    const end = xy[xy.length - 1];
-    return '<polyline points="' + xy.map(q => q[0].toFixed(1) + "," + q[1].toFixed(1)).join(" ") + '" style="stroke:' + l.color + (l.dash ? ';stroke-dasharray:' + l.dash : '') + '"/>' +
-      (stretch ? '' : '<circle cx="' + end[0].toFixed(1) + '" cy="' + end[1].toFixed(1) + '" r="4" style="fill:' + l.color + ';stroke:none"/>');
-  }).join("");
-  return '<svg class="graph" viewBox="0 0 ' + w + ' ' + h + '"' + (stretch ? ' preserveAspectRatio="none"' : '') + ' role="img" aria-label="' + esc(label) + '"><line x1="0" y1="' + (h - 1) + '" x2="' + w + '" y2="' + (h - 1) + '" style="stroke:var(--line);stroke-width:1"/>' + body + '</svg>' +
-    (stretch ? '' : '<div class="axis"><span>' + fmt(iso(new Date(t0))) + '</span><span>' + fmt(iso(new Date(t1))) + '</span></div>');
+/* Graphen: rechts steht immer heute, das Raster wandert mit der Zeit nach links. Klein: 3 Monate, Raster ab 100. Groß: 4 Monate, Raster ab 50, mit dem Finger verschiebbar.
+   graph() legt nur einen Platzhalter an, drawCharts() zeichnet nach render() in der echten Breite. Verschiebung in Tagen und Einheiten (prog.pan), damit Drehen oder Breite sie nicht ändern. */
+const DAY = 864e5, charts = [];
+function graph(lines, o) {   // o: { big, base: [klein, groß], label, id }
+  const pts = [].concat.apply([], lines.map(l => l.pts));
+  if (!pts.length) return '<p class="muted nodata">Noch keine Daten</p>';
+  if (!o.big && !pts.some(p => p[0] >= addDays(today(), -91))) return '<p class="muted nodata">Nichts in den letzten 3 Monaten</p>';
+  o.lines = lines; o.pan = o.big ? (prog.pan[o.id] = prog.pan[o.id] || { d: 0, v: 0 }) : { d: 0, v: 0 };
+  return '<span class="chart' + (o.big ? ' big' : '') + '" data-c="' + (charts.push(o) - 1) + '" role="img" aria-label="' + esc(o.label) + '"></span>';
 }
+function drawCharts() { document.querySelectorAll(".chart[data-c]").forEach(drawChart); }
+function drawChart(el) {
+  const c = charts[el.dataset.c], W = el.clientWidth, H = el.clientHeight;
+  if (!c || !W) return;
+  const big = c.big, fs = big ? 11 : 9.5, T = 5, B = 17, R = 6, ph = H - T - B, days = big ? 122 : 91, now = parse(today()).getTime();
+  const pts = [].concat.apply([], c.lines.map(l => l.pts)).map(p => [parse(p[0]).getTime(), p[1]]), vals = pts.map(p => p[1]);
+  // Maßstab einmal aus dem Fenster ohne Verschiebung, danach fest
+  let vis = pts.filter(p => p[0] >= now - days * DAY).map(p => p[1]); if (!vis.length) vis = vals;
+  const vmin = Math.min.apply(null, vals), vmax = Math.max.apply(null, vals), base = c.base[big ? 1 : 0];
+  let lo = Math.min.apply(null, vis), hi = Math.max.apply(null, vis);
+  const pad = Math.max((hi - lo) * .15, base); lo = Math.max(0, lo - pad); hi += pad;
+  const upp = (hi - lo) / ph, pan = c.pan;
+  pan.d = Math.max(0, Math.min(pan.d, Math.max(0, (now - Math.min.apply(null, pts.map(p => p[0]))) / DAY - days + 10)));
+  pan.v = Math.max(Math.max(vmin - hi, -lo), Math.min(pan.v, vmax - lo));
+  const step = gridStep(base, upp, big ? 8 : 5), lstep = gridStep(step, upp, big ? 16 : 12), v0 = lo + pan.v, v1 = hi + pan.v;
+  const de = n => n.toLocaleString("de-DE");
+  const L = Math.ceil(String(de(Math.floor(v1 / lstep) * lstep)).length * fs * .58) + 8, pw = W - L - R, ppd = pw / days;
+  el._k = { ppd, upp };
+  const X = t => L + pw - ((now - t) / DAY - pan.d) * ppd, Y = v => T + ph - (v - v0) / upp, f = n => n.toFixed(1);
+  let g = "";
+  for (let v = Math.ceil(v0 / step) * step; v <= v1; v += step) {
+    const y = Y(v), lab = Math.round(v / lstep) * lstep === Math.round(v);
+    g += '<line class="' + (lab ? 'gl' : 'gf') + '" x1="' + L + '" x2="' + (L + pw) + '" y1="' + f(y) + '" y2="' + f(y) + '"/>';
+    if (lab && y > T + fs / 2) g += '<text x="' + (L - 5) + '" y="' + f(y + fs * .35) + '" text-anchor="end">' + de(Math.round(v)) + '</text>';
+  }
+  const left = new Date(now - (days + pan.d + 31) * DAY);
+  for (let d = parse(monday(iso(left))); d.getTime() <= now; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 7)) {
+    const x = X(d.getTime());
+    if (x >= L && x <= L + pw) g += '<line class="gf" x1="' + f(x) + '" x2="' + f(x) + '" y1="' + T + '" y2="' + (T + ph) + '"/>';
+  }
+  for (let d = new Date(left.getFullYear(), left.getMonth(), 1); d.getTime() <= now; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) {
+    const x = X(d.getTime());
+    if (x < L || x > L + pw) continue;
+    g += '<line class="gl" x1="' + f(x) + '" x2="' + f(x) + '" y1="' + T + '" y2="' + (T + ph) + '"/>';
+    if (x + fs * 2.4 < L + pw) g += '<text x="' + f(x + 3) + '" y="' + (H - 4) + '">' + MONS[d.getMonth()] + '</text>';
+  }
+  const id = "cp" + el.dataset.c;
+  const body = c.lines.filter(l => l.pts.length).map(l => {
+    const xy = l.pts.map(p => [X(parse(p[0]).getTime()), Y(p[1])]), end = xy[xy.length - 1];
+    return '<polyline points="' + xy.map(q => f(q[0]) + "," + f(q[1])).join(" ") + '" style="stroke:' + l.color + (l.dash ? ';stroke-dasharray:' + l.dash : '') + '"/>' +
+      (big || xy.length === 1 ? '<circle cx="' + f(end[0]) + '" cy="' + f(end[1]) + '" r="' + (big ? 4 : 3) + '" style="fill:' + l.color + '"/>' : '');
+  }).join("");
+  el.innerHTML = '<svg class="graph" width="' + W + '" height="' + H + '" style="font-size:' + fs + 'px" aria-hidden="true"><defs><clipPath id="' + id + '"><rect x="' + L + '" y="' + (T - 4) + '" width="' + (pw + R) + '" height="' + (ph + 8) + '"/></clipPath></defs>' +
+    g + '<line class="gl" x1="' + L + '" x2="' + (L + pw) + '" y1="' + (T + ph) + '" y2="' + (T + ph) + '"/><g clip-path="url(#' + id + ')">' + body + '</g></svg>';
+  if (big && !el.onpointerdown) {
+    let last = null;
+    el.onpointerdown = e => { last = [e.clientX, e.clientY]; el.setPointerCapture(e.pointerId); };
+    el.onpointermove = e => {
+      if (!last) return;
+      pan.d += (e.clientX - last[0]) / el._k.ppd; pan.v += (e.clientY - last[1]) * el._k.upp; last = [e.clientX, e.clientY]; drawChart(el);
+    };
+    el.onpointerup = el.onpointercancel = () => {
+      last = null;
+      const moved = Object.keys(prog.pan).some(k => prog.pan[k].d || prog.pan[k].v);
+      document.querySelectorAll('[data-act="panhome"]').forEach(b => b.hidden = !moved);
+    };
+  }
+}
+window.addEventListener("resize", drawCharts);
 const resetOf = key => (st.reset || {})[key] || "";
 const groupSeries = key => series(st, ex => ex.kind === "kraft" && ex.group === key, volume, resetOf(key));
+const VOL = [100, 50];
 const cardioLines = () => [
-  { name: "Dauer", pts: series(st, ex => ex.kind === "kardio", e => Number(e.min) || 0, resetOf("kardio")), color: KARDIO.color, dash: "" },
-  { name: "Kalorien", pts: series(st, ex => ex.kind === "kardio", e => Number(e.kcal) || 0, resetOf("kardio")), color: "var(--ink)", dash: "7 5" }
+  { name: "Dauer", unit: "min", base: [10, 5], pts: series(st, ex => ex.kind === "kardio", e => Number(e.min) || 0, resetOf("kardio")), color: KARDIO.color, dash: "" },
+  { name: "Kalorien", unit: "kcal", base: [100, 50], pts: series(st, ex => ex.kind === "kardio", e => Number(e.kcal) || 0, resetOf("kardio")), color: "var(--ink)", dash: "7 5" }
 ];
 
 VIEWS.progress = () => {
@@ -669,7 +735,7 @@ VIEWS.progress = () => {
     html += '<div class="list">' + all.map(g => {
       const cl = g.key === "kardio" ? cardioLines() : null;
       const lines = cl ? [cl[0].pts.length ? cl[0] : cl[1]] : [{ pts: groupSeries(g.key), color: g.color }];
-      return '<button class="grow" data-act="sel" data-key="' + g.key + '"><span class="gname"><span class="dot" style="background:' + g.color + '"></span>' + esc(g.name) + '</span><span class="gbox">' + graph(lines, 200, 44, false, "Verlauf " + g.name, true) + '</span></button>';
+      return '<button class="grow" data-act="sel" data-key="' + g.key + '"><span class="gname"><span class="dot" style="background:' + g.color + '"></span>' + esc(g.name) + '</span><span class="gbox">' + graph(lines, { base: cl ? cl[cl[0].pts.length ? 0 : 1].base : VOL, label: "Verlauf " + g.name + ", letzte 3 Monate" }) + '</span></button>';
     }).join("") + '</div>';
     const any = Object.keys(st.reset || {}).length;
     return html + '<p class="muted small">Übungen mit Körpergewicht (0 kg) zählen nicht mit.</p>' +
@@ -677,20 +743,21 @@ VIEWS.progress = () => {
       (any ? '<button class="btn ghost slim" data-act="unreset" data-key="alle">Ältere Einträge wieder zeigen</button>' : '');
   }
   const g = all.find(x => x.key === prog.sel) || KARDIO;
-  let lines, legend = "";
+  let lines, legend = "", plot;
   if (g.key === "kardio") {
-    lines = cardioLines();
-    legend = lines.map(l => '<div class="row" style="min-height:40px"><svg viewBox="0 0 28 10" style="width:28px;height:10px" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" style="stroke:' + l.color + (l.dash ? ';stroke-dasharray:' + l.dash : '') + '"/></svg><span class="name">' + l.name + '</span></div>').join("");
+    const cl = cardioLines().filter(l => l.pts.length);
+    plot = cl.length ? cl.map((l, i) => '<p class="ctitle"><span class="dot" style="background:' + l.color + '"></span>' + l.name + ' in ' + l.unit + '</p>' + graph([l], { big: true, base: l.base, id: "kardio" + i, label: "Verlauf " + l.name })).join("") : graph([], {});
   } else if (prog.single) {
     const ids = Object.keys(st.ex).filter(id => st.ex[id].kind === "kraft" && st.ex[id].group === g.key);
     lines = ids.map((id, i) => ({ name: st.ex[id].name, pts: series(st, (ex, x) => x === id, volume, resetOf(g.key)), color: i % 2 ? "var(--ink)" : g.color, dash: DASH[Math.floor(i / 2) % DASH.length] })).filter(l => l.pts.length);
     legend = lines.map(l => '<div class="row" style="min-height:40px"><svg viewBox="0 0 28 10" style="width:28px;height:10px" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" style="stroke:' + l.color + (l.dash ? ';stroke-dasharray:' + l.dash : '') + '"/></svg><span class="name">' + esc(l.name) + '</span></div>').join("");
   } else lines = [{ pts: groupSeries(g.key), color: g.color }];
+  if (!plot) plot = graph(lines, { big: true, base: VOL, id: g.key, label: "Verlauf " + g.name });
   html += '<article class="card"><div class="row" style="justify-content:space-between"><h2 class="cond h2">' + esc(g.name) + '</h2>' +
     (g.key !== "kardio" ? '<button class="switch" role="switch" aria-checked="' + !!prog.single + '" data-act="single">Übungen einzeln<span class="track"><span class="knob"></span></span></button>' : '') + '</div>' +
-    graph(lines, 320, 200, g.key !== "kardio", "Verlauf " + g.name, false) + (legend ? '<div>' + legend + '</div>' : '') + '</article>';
+    plot + '<button class="btn ghost slim" data-act="panhome"' + (Object.keys(prog.pan).some(k => prog.pan[k].d || prog.pan[k].v) ? '' : ' hidden') + '>Zurück zu heute</button>' + (legend ? '<div>' + legend + '</div>' : '') + '</article>';
   const from = resetOf(g.key);
-  return html + (g.key === "kardio" ? '<p class="muted small">Dauer und Kalorien haben je eine eigene Skala.</p>' : '<p class="muted small">Übungen mit Körpergewicht (0 kg) zählen nicht mit.</p>') +
+  return html + '<p class="muted small">Graph mit dem Finger verschieben, um ältere Stände zu sehen.' + (g.key === "kardio" ? '' : ' Übungen mit Körpergewicht (0 kg) zählen nicht mit.') + '</p>' +
     (from ? '<p class="muted small">Neu gestartet am ' + fmt(from) + '. Ältere Einträge sind ausgeblendet, nicht gelöscht.</p><button class="btn ghost slim" data-act="unreset" data-key="' + g.key + '">Ältere Einträge wieder zeigen</button>' : '') +
     '<button class="btn ghost" data-act="resetgraph" data-key="' + g.key + '">Graph neu starten</button>';
 };
@@ -896,8 +963,9 @@ const ACT = {
   thisweek: () => { weekOff = 0; render(); },
   progress: () => show(2),
   settings: () => go({ view: "settings" }),
-  sel: d => { prog.sel = d.key; render(); },
-  single: () => { prog.single = !prog.single; render(); },
+  sel: d => { prog.sel = d.key; prog.pan = {}; render(); },
+  single: () => { prog.single = !prog.single; prog.pan = {}; render(); },
+  panhome: () => { prog.pan = {}; render(); },
   form: (d, el) => {
     const ds = d.ds || ui.ds, next = { view: "form", ds: ds, f: newForm() };
     if (el.closest("#p-week")) openMid(next, { view: "day", ds: ds }); else go(next);
